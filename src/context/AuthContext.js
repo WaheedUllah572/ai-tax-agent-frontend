@@ -2,29 +2,33 @@ import React, { createContext, useContext, useState } from "react";
 
 const AuthContext = createContext();
 
+// ✅ LIVE BACKEND URL
+const API_BASE = "https://ai-tax-agent-backend-lxlw.onrender.com";
+
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(
+    JSON.parse(localStorage.getItem("user"))
+  );
   const [pendingEmail, setPendingEmail] = useState(null);
 
   // -------------------------------
-  // REGISTER USER (Backend)
+  // REGISTER USER
   // -------------------------------
   const register = async (name, email, password) => {
-    const res = await fetch("http://localhost:8000/auth/register", {
+    const res = await fetch(`${API_BASE}/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, email, password }),
     });
 
-    const data = await res.json();
-    return data;
+    return await res.json();
   };
 
   // -------------------------------
   // LOGIN — Step 1
   // -------------------------------
   const loginStep1 = async (email, password) => {
-    const res = await fetch("http://localhost:8000/auth/login", {
+    const res = await fetch(`${API_BASE}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
@@ -38,8 +42,9 @@ export const AuthProvider = ({ children }) => {
     }
 
     if (data["login_success"]) {
-      setUser({ email });
-      localStorage.setItem("user", JSON.stringify({ email }));
+      const userData = { email };
+      setUser(userData);
+      localStorage.setItem("user", JSON.stringify(userData));
       return { success: true };
     }
 
@@ -50,7 +55,7 @@ export const AuthProvider = ({ children }) => {
   // VERIFY OTP
   // -------------------------------
   const verify2FA = async (code) => {
-    const res = await fetch("http://localhost:8000/auth/verify-2fa", {
+    const res = await fetch(`${API_BASE}/auth/verify-2fa`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: pendingEmail, code }),
@@ -59,8 +64,9 @@ export const AuthProvider = ({ children }) => {
     const data = await res.json();
 
     if (data["login_success"]) {
-      setUser({ email: pendingEmail });
-      localStorage.setItem("user", JSON.stringify({ email: pendingEmail }));
+      const userData = { email: pendingEmail };
+      setUser(userData);
+      localStorage.setItem("user", JSON.stringify(userData));
       setPendingEmail(null);
       return { success: true };
     }

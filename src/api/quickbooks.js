@@ -1,12 +1,10 @@
 import axios from "axios";
 
-// ✅ Stable backend base URL
-const API_BASE_URL =
-  import.meta?.env?.VITE_API_BASE_URL?.trim() ||
-  process.env.REACT_APP_API_BASE_URL?.trim() ||
-  "https://ai-tax-agent-backend-klwl.onrender.com";
+// ✅ REMOVE import.meta (BREAKING BUILD)
+// ✅ USE FIXED URL
 
-// ✅ Axios instance
+const API_BASE_URL = "https://ai-tax-agent-backend-lxlw.onrender.com";
+
 const API = axios.create({
   baseURL: `${API_BASE_URL}/quickbooks`,
   headers: {
@@ -15,7 +13,6 @@ const API = axios.create({
   withCredentials: true,
 });
 
-// ✅ QuickBooks Endpoints
 export const getCompanyInfo = () => API.get("/status");
 export const getCustomers = () => API.get("/customers");
 export const getInvoices = () => API.get("/invoices");
