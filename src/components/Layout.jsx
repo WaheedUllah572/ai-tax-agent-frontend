@@ -21,10 +21,10 @@ export default function Layout() {
   const [userName, setUserName] = useState("User");
   const [xeroConnected, setXeroConnected] = useState(false);
 
+  // ✅ FIXED: Use ONLY one env variable (NO import.meta, NO localhost fallback)
   const baseUrl =
     process.env.REACT_APP_API_BASE_URL?.trim() ||
-    import.meta?.env?.VITE_API_BASE_URL?.trim() ||
-    "http://localhost:8000";
+    "https://ai-tax-agent-backend-lxlw.onrender.com";
 
   // Load user
   useEffect(() => {
@@ -89,16 +89,13 @@ export default function Layout() {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* SIDEBAR */}
       <aside className="w-64 bg-gradient-to-b from-indigo-100 to-white border-r border-gray-200 flex flex-col justify-between">
         <div>
-          {/* Logo */}
           <div className="flex items-center justify-center py-6 border-b border-gray-200">
             <img src="/logo.svg" className="h-10 w-10 mr-2 rounded-full bg-white shadow" />
             <h1 className="text-xl font-bold text-indigo-700">TaxMind AI</h1>
           </div>
 
-          {/* MAIN NAV */}
           <nav className="p-4 space-y-2">
             {menuItems.map((item) => (
               <Link
@@ -116,13 +113,11 @@ export default function Layout() {
             ))}
           </nav>
 
-          {/* XERO SECTION */}
           <div className="border-t border-gray-200 mt-4 pt-4">
             <h4 className="text-xs font-semibold text-gray-500 uppercase px-4 mb-2">
               Xero Accounting
             </h4>
 
-            {/* Status */}
             <div className="mx-4 mb-4 flex items-center justify-between bg-white border border-gray-200 rounded-xl shadow-sm px-3 py-2">
               <div className="flex items-center gap-2">
                 <CurrencyDollarIcon className="h-5 w-5 text-blue-600" />
@@ -155,7 +150,6 @@ export default function Layout() {
             </nav>
           </div>
 
-          {/* SUBSCRIPTION */}
           <div className="border-t border-gray-200 mt-4 pt-4">
             <h4 className="text-xs font-semibold text-gray-500 uppercase px-4 mb-2">
               Subscription
@@ -180,27 +174,19 @@ export default function Layout() {
           </div>
         </div>
 
-        {/* FOOTER */}
         <div className="p-4 border-t border-gray-200">
-          <Link
-            to="/login"
-            className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
-          >
+          <Link to="/login" className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
             <ArrowRightOnRectangleIcon className="h-5 w-5" />
             Login
           </Link>
 
-          <Link
-            to="/register"
-            className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
-          >
+          <Link to="/register" className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
             <UserPlusIcon className="h-5 w-5" />
             Register
           </Link>
         </div>
       </aside>
 
-      {/* MAIN CONTENT */}
       <div className="flex-1 flex flex-col">
         <header className="flex justify-between items-center bg-white border-b border-gray-200 px-6 py-4 shadow-sm sticky top-0">
           <h2 className="text-xl font-semibold text-gray-700">

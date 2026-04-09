@@ -1,9 +1,9 @@
 import axios from "axios";
 
-// ✅ REMOVE import.meta (BREAKING BUILD)
-// ✅ USE FIXED URL
-
-const API_BASE_URL = "https://ai-tax-agent-backend-lxlw.onrender.com";
+// ✅ USE SAME ENV VARIABLE EVERYWHERE
+const API_BASE_URL =
+  process.env.REACT_APP_API_BASE_URL?.trim() ||
+  "https://ai-tax-agent-backend-lxlw.onrender.com";
 
 const API = axios.create({
   baseURL: `${API_BASE_URL}/quickbooks`,
