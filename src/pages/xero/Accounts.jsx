@@ -19,9 +19,10 @@ export default function XeroAccounts() {
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // ✅ FIXED: removed localhost fallback
   const BASE_URL =
-    process.env.REACT_APP_API_BASE_URL?.trim() ||
-    "http://localhost:8000";
+    process.env.REACT_APP_API_BASE_URL ||
+    "https://ai-tax-agent-backend-lxlw.onrender.com";
 
   useEffect(() => {
     axios

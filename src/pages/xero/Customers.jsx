@@ -5,9 +5,10 @@ export default function XeroCustomers() {
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // ✅ FIXED
   const BASE_URL =
-    process.env.REACT_APP_API_BASE_URL?.trim() ||
-    "http://localhost:8000";
+    process.env.REACT_APP_API_BASE_URL ||
+    "https://ai-tax-agent-backend-lxlw.onrender.com";
 
   useEffect(() => {
     axios
