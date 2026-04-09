@@ -25,7 +25,7 @@ ChartJS.register(
 );
 
 export default function Dashboard() {
-  const BASE_URL = "https://ai-tax-agent-backend-lxlw.onrender.com";
+  const BASE_URL = "https://ai-tax-agent-backend-1.onrender.com";
 
   const [gmailConnected, setGmailConnected] = useState(false);
   const [xeroConnected, setXeroConnected] = useState(false);

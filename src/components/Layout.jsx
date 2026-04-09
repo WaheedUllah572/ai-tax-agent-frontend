@@ -24,7 +24,7 @@ export default function Layout() {
   // ✅ FIXED: Use ONLY one env variable (NO import.meta, NO localhost fallback)
   const baseUrl =
     process.env.REACT_APP_API_BASE_URL?.trim() ||
-    "https://ai-tax-agent-backend-lxlw.onrender.com";
+    "https://ai-tax-agent-backend-1.onrender.com";
 
   // Load user
   useEffect(() => {

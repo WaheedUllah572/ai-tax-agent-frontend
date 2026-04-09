@@ -8,7 +8,7 @@ export default function XeroInvoices() {
   // ✅ FIXED
   const BASE_URL =
     process.env.REACT_APP_API_BASE_URL ||
-    "https://ai-tax-agent-backend-lxlw.onrender.com";
+    "https://ai-tax-agent-backend-1.onrender.com";
 
   useEffect(() => {
     axios

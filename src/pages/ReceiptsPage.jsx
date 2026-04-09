@@ -13,7 +13,7 @@ export default function ReceiptsPage() {
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  const BASE_URL = "https://ai-tax-agent-backend-lxlw.onrender.com";
+  const BASE_URL = "https://ai-tax-agent-backend-1.onrender.com";
 
   useEffect(() => {
     fetchReceipts();

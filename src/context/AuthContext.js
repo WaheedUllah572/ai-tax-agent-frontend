@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState } from "react";
 const AuthContext = createContext();
 
 // ✅ LIVE BACKEND URL
-const API_BASE = "https://ai-tax-agent-backend-lxlw.onrender.com";
+const API_BASE = "https://ai-tax-agent-backend-1.onrender.com";
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(
