@@ -4,7 +4,7 @@ import axios from "axios";
 const BASE_URL =
   process.env.REACT_APP_API_BASE_URL ||
   window.__API_BASE_URL__ ||
-  "http://localhost:8000";
+  "https://ai-tax-agent-backend-1.onrender.com";
 
 export default function GmailConnect() {
   const [year, setYear] = useState(new Date().getFullYear());

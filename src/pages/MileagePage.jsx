@@ -16,7 +16,7 @@ export default function MileagePage() {
 
   // ✅ LOAD TRIPS FROM BACKEND
   useEffect(() => {
-    axios.get("http://localhost:8000/mileage/history")
+    axios.get("https://ai-tax-agent-backend-1.onrender.com/mileage/history")
       .then(res => {
         const formattedTrips = res.data.map(t => ({
           id: t.trip_id,
@@ -44,7 +44,7 @@ export default function MileagePage() {
 
     try {
       setLoadingMiles(true);
-      const res = await axios.get("http://localhost:8000/calculate-miles", {
+      const res = await axios.get("https://ai-tax-agent-backend-1.onrender.com/calculate-miles", {
         params: { start: form.start, destination: form.destination },
       });
 

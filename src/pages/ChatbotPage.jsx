@@ -75,7 +75,7 @@ export default function ChatbotPage() {
     setLoading(true);
 
     try {
-      const res = await axios.post("http://localhost:8000/chat", {
+      const res = await axios.post("https://ai-tax-agent-backend-1.onrender.com/chat", {
         message: messageToSend,
         session_id: "user-session-1",
       });

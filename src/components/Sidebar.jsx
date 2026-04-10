@@ -13,7 +13,7 @@ import axios from "axios";
 // BASE URL
 const BASE_URL =
   process.env.REACT_APP_API_BASE_URL?.trim() ||
-  "http://localhost:8000";
+  "https://ai-tax-agent-backend-1.onrender.com";
 
 // MAIN NAVIGATION
 const navItems = [

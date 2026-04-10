@@ -23,7 +23,7 @@ export default function JoinTaxMate() {
   const handleSubscribe = async () => {
     try {
       setLoading(true);
-      const res = await axios.post("http://localhost:8000/create-checkout-session", {
+      const res = await axios.post("https://ai-tax-agent-backend-1.onrender.com/create-checkout-session", {
         additional_accounts: accounts,
         quickbooks,
       });
