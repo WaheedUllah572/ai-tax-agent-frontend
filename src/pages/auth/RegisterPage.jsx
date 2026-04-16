@@ -11,28 +11,32 @@ export default function RegisterPage() {
   const { register } = useAuth();
   const navigate = useNavigate();
 
-  const handleRegister = (e) => {
-    e.preventDefault();
+  const handleRegister = async (e) => {
+  e.preventDefault();
 
-    if (!name || !email || !password) {
-      alert("⚠️ All fields are required.");
-      return;
-    }
-    if (password !== confirmPassword) {
-      alert("⚠️ Passwords do not match.");
-      return;
-    }
+  if (!name || !email || !password) {
+    alert("⚠️ All fields are required.");
+    return;
+  }
 
-    // ✅ Save new user to localStorage
-    const user = { name, email };
-    localStorage.setItem("user", JSON.stringify(user));
+  if (password !== confirmPassword) {
+    alert("⚠️ Passwords do not match.");
+    return;
+  }
 
-    // Optional: call your backend or auth context
-    register(name, email, password);
+  const result = await register(name, email, password);
 
-    // Redirect after register
-    navigate("/dashboard");
-  };
+  if (result?.error) {
+    alert(result.error);
+    return;
+  }
+
+  // ✅ Only login after success
+  const user = { name, email };
+  localStorage.setItem("user", JSON.stringify(user));
+
+  navigate("/dashboard");
+};
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-green-200 via-white to-blue-200">

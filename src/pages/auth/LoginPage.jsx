@@ -25,7 +25,7 @@ export default function LoginPage() {
     if (result?.success) {
       navigate("/dashboard");
     } else {
-      alert("Invalid login ❌");
+      alert(result?.error || "Invalid login ❌");
     }
   };
 

@@ -18,12 +18,15 @@ export default function ReportsPage() {
   const COLORS = ["#6366F1", "#10B981", "#F59E0B", "#EC4899"];
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/reports-summary")
-      .then((res) => res.json())
-      .then((data) => setSummary(data.summary || {}))
-      .catch(() => {});
-  }, []);
+  const BASE_URL =
+    process.env.REACT_APP_API_BASE_URL?.trim() ||
+    "https://ai-tax-agent-backend-1.onrender.com";
 
+  fetch(`${BASE_URL}/reports-summary`)
+    .then((res) => res.json())
+    .then((data) => setSummary(data.summary || {}))
+    .catch(() => {});
+}, []);
   const downloadPDF = () => {
     const doc = new jsPDF();
     doc.text("Expense Summary", 20, 20);
