@@ -5,15 +5,18 @@ export default function XeroCustomers() {
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ✅ FIXED
+  // ✅ FIXED (safe + consistent)
   const BASE_URL =
-    process.env.REACT_APP_API_BASE_URL ||
+    process.env.REACT_APP_API_BASE_URL?.trim() ||
     "https://ai-tax-agent-backend-1.onrender.com";
 
   useEffect(() => {
     axios
       .get(`${BASE_URL}/xero/customers`)
-      .then((res) => setCustomers(res.data || []))
+      .then((res) => {
+        // ✅ FIX: extract correct array from backend response
+        setCustomers(res.data?.customers || []);
+      })
       .catch(() => setCustomers([]))
       .finally(() => setLoading(false));
   }, [BASE_URL]);
@@ -22,7 +25,7 @@ export default function XeroCustomers() {
     return <p className="p-8">Loading Xero Customers...</p>;
   }
 
-  if (customers.length === 0) {
+  if (!Array.isArray(customers) || customers.length === 0) {
     return <p className="p-8">No customers found in Xero.</p>;
   }
 
