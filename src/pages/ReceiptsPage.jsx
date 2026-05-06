@@ -19,11 +19,21 @@ export default function ReceiptsPage() {
     fetchReceipts();
   }, []);
 
-  const formatAmount = (amount) => {
+  // ✅ FIXED: dynamic currency formatting
+  const formatAmount = (amount, currency) => {
     const num = parseFloat(
       String(amount || "0").replace(/[^\d.]/g, "")
     );
-    return `$${num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+    const formatted = num.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+
+    if (currency === "PKR") return `Rs ${formatted}`;
+    if (currency === "USD") return `$${formatted}`;
+
+    return `${formatted}`;
   };
 
   const fetchReceipts = async () => {
@@ -38,8 +48,9 @@ export default function ReceiptsPage() {
       url: `${BASE_URL}/uploads/${r.filename}`,
       vendor: r.vendor,
       date: r.date,
-      rawAmount: r.amount, // keep raw numeric
-      amount: formatAmount(r.amount), // formatted for UI
+      rawAmount: r.amount,
+      currency: r.currency || "USD", // ✅ IMPORTANT
+      amount: formatAmount(r.amount, r.currency), // ✅ FIXED
       category: r.category || "Uncategorized",
       document_type: r.document_type || "Unknown",
       deduction_type: r.deduction_type || "Uncategorized",
@@ -95,7 +106,7 @@ export default function ReceiptsPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         vendor: editingReceipt.vendor,
-        amount: editingReceipt.rawAmount, // send raw amount only
+        amount: editingReceipt.rawAmount,
         category: editingReceipt.category,
         date: editingReceipt.date,
       }),
