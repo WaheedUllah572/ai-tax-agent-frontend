@@ -50,7 +50,10 @@ export default function ReceiptsPage() {
       date: r.date,
       rawAmount: r.amount,
       currency: r.currency || "USD", // ✅ IMPORTANT
-      amount: formatAmount(r.amount, r.currency), // ✅ FIXED
+      amount: formatAmount(
+      r.usd_amount !== undefined ? r.usd_amount : r.amount,
+      "USD"
+     ),
       category: r.category || "Uncategorized",
       document_type: r.document_type || "Unknown",
       deduction_type: r.deduction_type || "Uncategorized",
