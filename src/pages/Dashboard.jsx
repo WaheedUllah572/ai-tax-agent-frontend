@@ -12,7 +12,6 @@ import {
 } from "chart.js";
 
 import {
-  Bar,
   Doughnut,
   Line,
 } from "react-chartjs-2";
@@ -149,6 +148,38 @@ export default function Dashboard() {
           <Doughnut data={categoryChart} />
 
         </div>
+
+      </div>
+
+      {/* REPORT EXPORT */}
+      <div className="bg-white p-6 rounded-3xl shadow-xl mt-10">
+
+        <div className="flex items-center justify-between mb-4">
+
+          <h2 className="text-xl font-bold">
+            AI Tax Reports
+          </h2>
+
+          <span className="text-xs bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full">
+            IRS Ready
+          </span>
+
+        </div>
+
+        <p className="text-gray-600 mb-5">
+          Export deduction summaries and business expense reports instantly.
+        </p>
+
+        <button
+          onClick={() =>
+            window.open(
+              `${BASE_URL}/reports/tax-report`
+            )
+          }
+          className="bg-green-600 text-white px-5 py-3 rounded-xl shadow hover:scale-[1.02] transition"
+        >
+          Download Tax Report
+        </button>
 
       </div>
 
