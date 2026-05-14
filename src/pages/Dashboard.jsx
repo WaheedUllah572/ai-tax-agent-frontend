@@ -7,12 +7,16 @@ import {
   LinearScale,
   LineElement,
   PointElement,
+  Tooltip,
+  Legend,
 } from "chart.js";
-import { Bar, Doughnut, Line } from "react-chartjs-2";
+
 import {
-  EnvelopeIcon,
-  BoltIcon,
-} from "@heroicons/react/24/outline";
+  Bar,
+  Doughnut,
+  Line,
+} from "react-chartjs-2";
+
 import axios from "axios";
 
 ChartJS.register(
@@ -21,181 +25,177 @@ ChartJS.register(
   CategoryScale,
   LinearScale,
   LineElement,
-  PointElement
+  PointElement,
+  Tooltip,
+  Legend
 );
 
 export default function Dashboard() {
-  const BASE_URL = "https://ai-tax-agent-backend-1.onrender.com";
 
-  const [gmailConnected, setGmailConnected] = useState(false);
-  const [xeroConnected, setXeroConnected] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const BASE_URL =
+    "https://ai-tax-agent-backend-1.onrender.com";
 
-  const [totalReceipts, setTotalReceipts] = useState(0);
-  const [totalSpending, setTotalSpending] = useState("0.00");
-  const [topVendor, setTopVendor] = useState("—");
-  const [monthlyData, setMonthlyData] = useState([]);
-  const [deductions, setDeductions] = useState({});
-  const [gmailResults, setGmailResults] = useState([]);
-  const [scanning, setScanning] = useState(false);
+  const [analytics, setAnalytics] =
+    useState(null);
 
   useEffect(() => {
-    fetchStatus();
-    setTimeout(() => {
-      fetchAnalytics();
-      setLoading(false);
-    }, 1200);
+    fetchAnalytics();
   }, []);
 
-  const fetchStatus = async () => {
-    try {
-      const gmail = await axios.get(`${BASE_URL}/gmail/status`);
-      setGmailConnected(gmail.data.connected);
-
-      const xero = await axios.get(`${BASE_URL}/xero/status`);
-      setXeroConnected(xero.data.connected);
-    } catch (err) {
-      console.error("Status error:", err);
-    }
-  };
-
   const fetchAnalytics = async () => {
+
     try {
-      const res = await axios.get(`${BASE_URL}/receipts/all`);
-      const receipts = res.data || [];
 
-      setTotalReceipts(receipts.length);
-
-      let sum = 0;
-      let vendorMap = {};
-      let monthMap = Array(12).fill(0);
-      let deductionMap = {};
-
-      receipts.forEach((r) => {
-        const amount =
-        parseFloat(
-        String(r.amount || "0").replace(/[^\d.]/g, "")
-       ) || 0;
-
-        const vendor = r.vendor || "Unknown";
-        const date = r.date ? new Date(r.date) : null;
-
-        const deduction = r.deduction_type || "Uncategorized";
-        deductionMap[deduction] = (deductionMap[deduction] || 0) + amount;
-
-        sum += amount;
-        vendorMap[vendor] = (vendorMap[vendor] || 0) + 1;
-
-        if (date && !isNaN(date)) {
-          const monthIndex = date.getMonth();
-          monthMap[monthIndex] += amount;
-        }
-      });
-
-      setTotalSpending(sum.toFixed(2));
-
-      const sorted = Object.entries(vendorMap).sort(
-        (a, b) => b[1] - a[1]
+      const res = await axios.get(
+        `${BASE_URL}/reports/analytics`
       );
 
-      setTopVendor(sorted[0]?.[0] || "—");
-      setMonthlyData(monthMap);
-      setDeductions(deductionMap);
+      setAnalytics(res.data);
 
     } catch (err) {
-      console.error("Analytics error:", err);
+
+      console.error(err);
     }
   };
 
-  const scanGmailReceipts = async () => {
-    setScanning(true);
-    try {
-      const res = await axios.get(`${BASE_URL}/gmail/scan`);
-      setGmailResults(res.data.receipts || []);
-      alert(`Imported ${res.data.imported} receipts from Gmail`);
-    } catch (err) {
-      console.error("Gmail scan error:", err);
-    }
-    setScanning(false);
-  };
+  if (!analytics) {
 
-  const connectXero = () => {
-    window.location.href = `${BASE_URL}/xero/connect`;
-  };
-
-  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-200 via-white to-purple-200">
-        <div className="animate-spin w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full"></div>
+      <div className="min-h-screen flex items-center justify-center">
+        Loading dashboard...
       </div>
     );
   }
 
+  const monthlyChart = {
+
+    labels: Object.keys(
+      analytics.monthly_data
+    ),
+
+    datasets: [
+      {
+        label: "Monthly Spending",
+
+        data: Object.values(
+          analytics.monthly_data
+        ),
+      },
+    ],
+  };
+
+  const categoryChart = {
+
+    labels: Object.keys(
+      analytics.category_data
+    ),
+
+    datasets: [
+      {
+        data: Object.values(
+          analytics.category_data
+        ),
+      },
+    ],
+  };
+
   return (
-    <div className="min-h-screen p-8 bg-gradient-to-br from-indigo-100 via-white to-purple-100">
-      <h1 className="text-5xl font-extrabold text-center bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-12">
+
+    <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-white to-purple-100 p-8">
+
+      <h1 className="text-5xl font-extrabold text-center mb-12 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
         TaxMate Analytics Dashboard
       </h1>
 
-      <div className="flex justify-center mb-8">
-        <button
-          onClick={scanGmailReceipts}
-          disabled={scanning}
-          className="bg-indigo-600 text-white px-6 py-3 rounded-xl shadow flex items-center gap-2 hover:scale-[1.02] transition disabled:opacity-70"
-        >
-          {scanning && (
-            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-          )}
-          {scanning ? "Scanning Gmail..." : "Scan Gmail for Receipts"}
-        </button>
+      {/* KPI */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+
+        <Card
+          title="Total Receipts"
+          value={analytics.total_receipts}
+        />
+
+        <Card
+          title="Total Spending"
+          value={`$${analytics.total_spending}`}
+        />
+
+        <Card
+          title="Top Vendor"
+          value={analytics.top_vendor}
+        />
+
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-16">
-        <KPI title="Total Receipts" value={totalReceipts} />
-        <KPI title="Total Spending" value={`$${totalSpending}`} />
-        <KPI title="Top Vendor" value={topVendor} />
-      </div>
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-      <div className="bg-white p-6 rounded-2xl shadow-xl border mb-12">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-gray-700">
-            AI Tax Deduction Insights
-          </h3>
-          <span className="text-xs bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full">
-            Auto-Analyzed
-          </span>
+        <div className="bg-white p-6 rounded-3xl shadow-xl">
+
+          <h2 className="text-xl font-bold mb-6">
+            Monthly Spending Trend
+          </h2>
+
+          <Line data={monthlyChart} />
+
         </div>
 
-        {Object.entries(deductions).map(([type, value]) => (
+        <div className="bg-white p-6 rounded-3xl shadow-xl">
+
+          <h2 className="text-xl font-bold mb-6">
+            Expense Categories
+          </h2>
+
+          <Doughnut data={categoryChart} />
+
+        </div>
+
+      </div>
+
+      {/* Vendors */}
+      <div className="bg-white p-6 rounded-3xl shadow-xl mt-10">
+
+        <h2 className="text-xl font-bold mb-6">
+          Vendor Insights
+        </h2>
+
+        {Object.entries(
+          analytics.vendor_data
+        ).map(([vendor, amount]) => (
+
           <div
-            key={type}
-            className="flex justify-between border-b py-2 text-sm"
+            key={vendor}
+            className="flex justify-between border-b py-3"
           >
-            <span className="font-medium">{type}</span>
-            <span className="text-green-600 font-semibold">
-              ${value.toFixed(2)}
+
+            <span className="font-medium">
+              {vendor}
             </span>
+
+            <span className="text-green-600 font-semibold">
+              ${amount.toFixed(2)}
+            </span>
+
           </div>
         ))}
-
-        <div className="mt-4">
-          <button
-            onClick={() => window.open(`${BASE_URL}/reports/tax-report`)}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg shadow hover:scale-[1.02] transition"
-          >
-            Download Tax Report
-          </button>
-        </div>
       </div>
     </div>
   );
 }
 
-function KPI({ title, value }) {
+function Card({ title, value }) {
+
   return (
-    <div className="p-6 rounded-3xl shadow-xl bg-white border hover:scale-[1.02] transition">
-      <h3 className="font-semibold text-gray-700 mb-2">{title}</h3>
-      <p className="text-3xl font-extrabold text-indigo-600">{value}</p>
+
+    <div className="bg-white p-6 rounded-3xl shadow-xl">
+
+      <h3 className="text-gray-600 font-medium mb-3">
+        {title}
+      </h3>
+
+      <p className="text-4xl font-extrabold text-indigo-600">
+        {value}
+      </p>
     </div>
   );
 }
