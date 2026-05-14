@@ -208,9 +208,8 @@ export default function ReceiptsPage() {
         </h2>
 
         <p className="text-gray-600">
-          AI automatically categorizes &
-          prepares IRS-ready expenses.
-        </p>
+          AI automatically categorizes, learns vendors & prepares IRS-ready expenses.
+                 </p>
 
       </div>
 
