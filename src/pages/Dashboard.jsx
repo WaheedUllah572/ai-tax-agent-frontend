@@ -37,9 +37,34 @@ export default function Dashboard() {
   const [analytics, setAnalytics] =
     useState(null);
 
+  const [gmailConnected, setGmailConnected] =
+    useState(false);
+
+  const [scanning, setScanning] =
+    useState(false);
+
   useEffect(() => {
     fetchAnalytics();
+    checkGmailStatus();
   }, []);
+
+  const checkGmailStatus = async () => {
+
+    try {
+
+      const res = await axios.get(
+        `${BASE_URL}/gmail/status`
+      );
+
+      setGmailConnected(
+        res.data.connected
+      );
+
+    } catch (err) {
+
+      console.error(err);
+    }
+  };
 
   const fetchAnalytics = async () => {
 
@@ -54,6 +79,42 @@ export default function Dashboard() {
     } catch (err) {
 
       console.error(err);
+    }
+  };
+
+  const connectGmail = () => {
+
+    window.location.href =
+      `${BASE_URL}/gmail/connect`;
+  };
+
+  const scanGmailReceipts = async () => {
+
+    try {
+
+      setScanning(true);
+
+      const res = await axios.get(
+        `${BASE_URL}/gmail/scan`
+      );
+
+      alert(
+        `Imported ${res.data.imported} receipts from Gmail`
+      );
+
+      fetchAnalytics();
+
+    } catch (err) {
+
+      console.error(err);
+
+      alert(
+        "Failed to scan Gmail receipts"
+      );
+
+    } finally {
+
+      setScanning(false);
     }
   };
 
@@ -105,6 +166,54 @@ export default function Dashboard() {
       <h1 className="text-5xl font-extrabold text-center mb-12 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
         TaxMate Analytics Dashboard
       </h1>
+
+      {/* GMAIL SECTION */}
+      <div className="bg-white p-6 rounded-3xl shadow-xl mb-10">
+
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+
+          <div>
+
+            <h2 className="text-2xl font-bold mb-2">
+              Gmail Receipt Import
+            </h2>
+
+            <p className="text-gray-600">
+              Automatically scan Gmail for receipts and business expenses.
+            </p>
+
+          </div>
+
+          <div className="flex gap-4">
+
+            {!gmailConnected ? (
+
+              <button
+                onClick={connectGmail}
+                className="bg-red-500 text-white px-5 py-3 rounded-xl shadow hover:scale-[1.02] transition"
+              >
+                Connect Gmail
+              </button>
+
+            ) : (
+
+              <button
+                onClick={scanGmailReceipts}
+                disabled={scanning}
+                className="bg-indigo-600 text-white px-5 py-3 rounded-xl shadow hover:scale-[1.02] transition disabled:opacity-60"
+              >
+                {scanning
+                  ? "Scanning..."
+                  : "Scan Gmail Receipts"}
+              </button>
+
+            )}
+
+          </div>
+
+        </div>
+
+      </div>
 
       {/* KPI */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
