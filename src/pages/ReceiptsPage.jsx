@@ -284,11 +284,16 @@ export default function ReceiptsPage() {
           >
 
             <img
-              src={r.url}
-              alt={r.name}
-              className="rounded-xl h-40 w-full object-cover mb-3"
-            />
+  src={r.url}
+  alt={r.name}
+  className="rounded-xl h-40 w-full object-cover mb-3"
+  onError={(e) => {
+    e.target.onerror = null;
 
+    e.target.src =
+      "https://placehold.co/600x400/f3f4f6/6b7280?text=Receipt+Preview";
+  }}
+/>
             {/* ✅ LEARNED VENDOR BADGE */}
 
             <div className="flex items-center gap-2">
