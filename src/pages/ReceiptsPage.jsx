@@ -87,6 +87,11 @@ aiConfidence:
 
 needsReview:
   r.needs_review || false,
+  isBlurry:
+  r.is_blurry || false,
+
+blurScore:
+  r.blur_score || 0,
     }));
 
     setReceipts(formatted);
@@ -317,6 +322,12 @@ needsReview:
 {r.needsReview && (
   <span className="bg-yellow-100 text-yellow-700 text-xs px-2 py-1 rounded-full">
     Needs Review
+  </span>
+)}
+
+{r.isBlurry && (
+  <span className="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full">
+    Blurry Image
   </span>
 )}
 
