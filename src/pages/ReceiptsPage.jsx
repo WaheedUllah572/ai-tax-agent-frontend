@@ -80,7 +80,13 @@ export default function ReceiptsPage() {
       aiProcessed: true,
 
       vendorLearned:
-        r.vendor_learned || false,
+  r.vendor_learned || false,
+
+aiConfidence:
+  r.ai_confidence || "low",
+
+needsReview:
+  r.needs_review || false,
     }));
 
     setReceipts(formatted);
@@ -303,11 +309,28 @@ export default function ReceiptsPage() {
               </h3>
 
               {r.vendorLearned && (
-                <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">
-                  Learned Vendor
-                </span>
-              )}
+  <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">
+    Learned Vendor
+  </span>
+)}
 
+{r.needsReview && (
+  <span className="bg-yellow-100 text-yellow-700 text-xs px-2 py-1 rounded-full">
+    Needs Review
+  </span>
+)}
+
+<span
+  className={`text-xs px-2 py-1 rounded-full ${
+    r.aiConfidence === "high"
+      ? "bg-green-100 text-green-700"
+      : r.aiConfidence === "medium"
+      ? "bg-yellow-100 text-yellow-700"
+      : "bg-red-100 text-red-700"
+  }`}
+>
+  AI: {r.aiConfidence}
+</span>
             </div>
 
             <p className="text-sm text-gray-500">

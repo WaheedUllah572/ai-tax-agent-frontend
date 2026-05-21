@@ -35,8 +35,10 @@ export default function Dashboard() {
     "https://ai-tax-agent-backend-1.onrender.com";
 
   const [analytics, setAnalytics] =
-    useState(null);
+  useState(null);
 
+const [reviewCount, setReviewCount] =
+  useState(0);
   const [gmailConnected, setGmailConnected] =
     useState(false);
 
@@ -75,6 +77,9 @@ export default function Dashboard() {
       );
 
       setAnalytics(res.data);
+      setReviewCount(
+  res.data.needs_review_count || 0
+);
 
     } catch (err) {
 
@@ -232,6 +237,11 @@ export default function Dashboard() {
           title="Top Vendor"
           value={analytics.top_vendor}
         />
+
+        <Card
+  title="Needs Review"
+  value={reviewCount}
+/>
 
       </div>
 
