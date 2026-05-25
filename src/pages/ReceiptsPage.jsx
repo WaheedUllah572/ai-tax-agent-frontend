@@ -226,7 +226,13 @@ blurScore:
 
       <div className="flex gap-3 justify-center mb-8">
 
-        {["All", "Pending", "Approved"].map(
+        {[
+  "All",
+  "Pending",
+  "Needs Review",
+  "Reviewed",
+  "Approved"
+].map(
           (f) => (
             <button
               key={f}
@@ -340,7 +346,11 @@ blurScore:
       : "bg-red-100 text-red-700"
   }`}
 >
-  AI: {r.aiConfidence}
+  AI: {
+  r.aiConfidence === "reviewed"
+    ? "Reviewed"
+    : r.aiConfidence
+}
 </span>
             </div>
 
