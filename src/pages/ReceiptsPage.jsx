@@ -92,6 +92,9 @@ needsReview:
 
 blurScore:
   r.blur_score || 0,
+
+possibleDuplicate:
+  r.possible_duplicate || false,
     }));
 
     setReceipts(formatted);
@@ -325,11 +328,19 @@ blurScore:
   </span>
 )}
 
-{r.needsReview && (
+{r.possibleDuplicate ? (
+
+  <span className="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full">
+    Possible Duplicate
+  </span>
+
+) : r.needsReview ? (
+
   <span className="bg-yellow-100 text-yellow-700 text-xs px-2 py-1 rounded-full">
     Needs Review
   </span>
-)}
+
+) : null}
 
 {r.isBlurry && (
   <span className="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full">
