@@ -149,6 +149,30 @@ possibleDuplicate:
     );
   };
 
+  const approveDuplicate = async (id) => {
+
+  await fetch(
+    `${BASE_URL}/receipts/approve-duplicate/${id}`,
+    {
+      method: "PUT",
+    }
+  );
+
+  fetchReceipts();
+};
+
+const markDuplicate = async (id) => {
+
+  await fetch(
+    `${BASE_URL}/receipts/mark-duplicate/${id}`,
+    {
+      method: "PUT",
+    }
+  );
+
+  fetchReceipts();
+};
+
   const deleteReceipt = async (id) => {
     await fetch(
       `${BASE_URL}/receipts/${id}`,
@@ -395,6 +419,32 @@ possibleDuplicate:
               </p>
 
             </div>
+
+            {r.possibleDuplicate && (
+
+  <div className="mt-4 flex gap-2">
+
+    <button
+      onClick={() =>
+        approveDuplicate(r.id)
+      }
+      className="flex-1 bg-green-600 text-white py-2 rounded-lg"
+    >
+      Approve Anyway
+    </button>
+
+    <button
+      onClick={() =>
+        markDuplicate(r.id)
+      }
+      className="flex-1 bg-orange-600 text-white py-2 rounded-lg"
+    >
+      Mark Duplicate
+    </button>
+
+  </div>
+
+)}
 
             {r.status === "Pending" && (
 
