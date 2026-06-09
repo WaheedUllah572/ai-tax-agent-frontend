@@ -352,6 +352,18 @@ const markDuplicate = async (id) => {
   </span>
 )}
 
+{r.status === "Approved" && (
+  <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">
+    Approved
+  </span>
+)}
+
+{r.status === "Duplicate" && (
+  <span className="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full">
+    Duplicate
+  </span>
+)}
+
 {r.possibleDuplicate ? (
 
   <span className="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full">
