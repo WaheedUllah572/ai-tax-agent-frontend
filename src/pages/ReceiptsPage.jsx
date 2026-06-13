@@ -76,6 +76,8 @@ export default function ReceiptsPage() {
       type: "Business",
 
       status: r.status || "Pending",
+      locked:
+  r.locked || false,
 
       aiProcessed: true,
 
@@ -363,6 +365,11 @@ const markDuplicate = async (id) => {
     Duplicate
   </span>
 )}
+{r.status === "Locked" && (
+  <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">
+    Locked
+  </span>
+)}
 
 {r.possibleDuplicate ? (
 
@@ -471,14 +478,18 @@ const markDuplicate = async (id) => {
 
             )}
 
-            <button
-              onClick={() =>
-                setEditingReceipt({ ...r })
-              }
-              className="mt-2 w-full bg-blue-500 text-white py-2 rounded-lg"
-            >
-              Edit
-            </button>
+            {!r.locked && (
+
+<button
+  onClick={() =>
+    setEditingReceipt({ ...r })
+  }
+  className="mt-2 w-full bg-blue-500 text-white py-2 rounded-lg"
+>
+  Edit
+</button>
+
+)}
 
             <button
               onClick={() =>
