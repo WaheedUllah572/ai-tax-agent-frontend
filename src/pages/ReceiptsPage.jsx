@@ -135,21 +135,16 @@ possibleDuplicate:
   };
 
   const approveReceipt = async (id) => {
-    await fetch(
-      `${BASE_URL}/receipts/approve/${id}`,
-      {
-        method: "PUT",
-      }
-    );
 
-    setReceipts((prev) =>
-      prev.map((r) =>
-        r.id === id
-          ? { ...r, status: "Approved" }
-          : r
-      )
-    );
-  };
+  await fetch(
+    `${BASE_URL}/receipts/approve/${id}`,
+    {
+      method: "PUT",
+    }
+  );
+
+  fetchReceipts();
+};
 
   const approveDuplicate = async (id) => {
 
@@ -260,7 +255,8 @@ const markDuplicate = async (id) => {
   "Pending",
   "Needs Review",
   "Reviewed",
-  "Approved"
+  "Locked",
+  "Duplicate"
 ].map(
           (f) => (
             <button
