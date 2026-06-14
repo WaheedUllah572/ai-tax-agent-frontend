@@ -3,7 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 
 import Layout from "./components/Layout";
-
+import SettingsPage from "./pages/SettingsPage";
 // Core Pages
 import Dashboard from "./pages/Dashboard";
 import ChatbotPage from "./pages/ChatbotPage";
@@ -49,6 +49,7 @@ function App() {
         <Route path="/receipts" element={<ReceiptsPage />} />
         <Route path="/mileage" element={<MileagePage />} />
         <Route path="/reports" element={<ReportsPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
 
         {/* ✅ Xero Routes (NEW) */}
         <Route path="/xero/customers" element={<XeroCustomers />} />
