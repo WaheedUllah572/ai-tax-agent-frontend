@@ -7,6 +7,7 @@ import {
   DocumentArrowUpIcon,
   MapIcon,
   ChartBarIcon,
+  Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
   UserPlusIcon,
   CreditCardIcon,
@@ -60,12 +61,18 @@ export default function Layout() {
   };
 
   const menuItems = [
-    { name: "Dashboard", path: "/dashboard", icon: <HomeIcon className="h-5 w-5" /> },
-    { name: "Chatbot", path: "/chatbot", icon: <ChatBubbleLeftRightIcon className="h-5 w-5" /> },
-    { name: "Receipts", path: "/receipts", icon: <DocumentArrowUpIcon className="h-5 w-5" /> },
-    { name: "Mileage", path: "/mileage", icon: <MapIcon className="h-5 w-5" /> },
-    { name: "Reports", path: "/reports", icon: <ChartBarIcon className="h-5 w-5" /> },
-  ];
+  { name: "Dashboard", path: "/dashboard", icon: <HomeIcon className="h-5 w-5" /> },
+  { name: "Chatbot", path: "/chatbot", icon: <ChatBubbleLeftRightIcon className="h-5 w-5" /> },
+  { name: "Receipts", path: "/receipts", icon: <DocumentArrowUpIcon className="h-5 w-5" /> },
+  { name: "Mileage", path: "/mileage", icon: <MapIcon className="h-5 w-5" /> },
+  { name: "Reports", path: "/reports", icon: <ChartBarIcon className="h-5 w-5" /> },
+
+  {
+    name: "Settings",
+    path: "/settings",
+    icon: <Cog6ToothIcon className="h-5 w-5" />,
+  },
+];
 
   const xeroItems = [
     { name: "Xero Customers", path: "/xero/customers" },
