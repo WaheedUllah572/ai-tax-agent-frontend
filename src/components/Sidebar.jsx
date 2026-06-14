@@ -7,6 +7,7 @@ import {
   MapIcon,
   ChartBarIcon,
   CurrencyDollarIcon,
+  Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
 import axios from "axios";
 
@@ -22,6 +23,12 @@ const navItems = [
   { name: "Receipts", path: "/receipts", icon: <DocumentArrowUpIcon className="h-5 w-5" /> },
   { name: "Mileage", path: "/mileage", icon: <MapIcon className="h-5 w-5" /> },
   { name: "Reports", path: "/reports", icon: <ChartBarIcon className="h-5 w-5" /> },
+
+  {
+    name: "Settings",
+    path: "/settings",
+    icon: <Cog6ToothIcon className="h-5 w-5" />
+  },
 ];
 
 // XERO PAGES
