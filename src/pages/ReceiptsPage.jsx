@@ -73,6 +73,15 @@ export default function ReceiptsPage() {
         r.irs_category ||
         "General Business Expense",
 
+        jurisdiction:
+  r.jurisdiction || "US",
+
+deductiblePercent:
+  r.deductible_percent || 0,
+
+ruleApplied:
+  r.rule_applied || "",
+
       type: "Business",
 
       status: r.status || "Pending",
@@ -424,6 +433,22 @@ const markDuplicate = async (id) => {
                 <strong>Currency:</strong>{" "}
                 {r.currency}
               </p>
+
+
+              <p>
+  <strong>Jurisdiction:</strong>{" "}
+  {r.jurisdiction}
+</p>
+
+<p>
+  <strong>Tax Category:</strong>{" "}
+  {r.irsCategory}
+</p>
+
+<p>
+  <strong>Deductible:</strong>{" "}
+  {r.deductiblePercent}%
+</p>
 
               <p className="font-bold text-green-600 mt-2 text-lg">
                 {r.amount}
