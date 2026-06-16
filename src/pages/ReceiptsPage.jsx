@@ -296,17 +296,17 @@ const markDuplicate = async (id) => {
           <p>Upload receipts</p>
 
           <input
-            id="file-upload"
-            type="file"
-            multiple
-            className="hidden"
-            ref={fileInputRef}
-            onChange={(e) =>
-              Array.from(
-                e.target.files
-              ).forEach(processReceipt)
-            }
-          />
+  id="file-upload"
+  type="file"
+  accept="image/*"
+  capture="environment"
+  multiple
+  className="hidden"
+  ref={fileInputRef}
+  onChange={(e) =>
+    Array.from(e.target.files).forEach(processReceipt)
+  }
+/>
 
         </label>
 
@@ -319,7 +319,7 @@ const markDuplicate = async (id) => {
 
           <CameraIcon className="h-5 w-5 inline mr-2" />
 
-          Upload Photo
+          Take Photo / Choose From Gallery
 
         </button>
 
