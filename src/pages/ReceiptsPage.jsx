@@ -12,6 +12,8 @@ export default function ReceiptsPage() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
+  const cameraInputRef = useRef(null);
+  const galleryInputRef = useRef(null);
 
   const BASE_URL = "https://ai-tax-agent-backend-1.onrender.com";
 
@@ -296,13 +298,21 @@ const markDuplicate = async (id) => {
           <p>Upload receipts</p>
 
           <input
-  id="file-upload"
   type="file"
   accept="image/*"
   capture="environment"
-  multiple
   className="hidden"
-  ref={fileInputRef}
+  ref={cameraInputRef}
+  onChange={(e) =>
+    Array.from(e.target.files).forEach(processReceipt)
+  }
+/>
+
+<input
+  type="file"
+  accept="image/*"
+  className="hidden"
+  ref={galleryInputRef}
   onChange={(e) =>
     Array.from(e.target.files).forEach(processReceipt)
   }
@@ -310,18 +320,23 @@ const markDuplicate = async (id) => {
 
         </label>
 
-        <button
-          onClick={() =>
-            fileInputRef.current.click()
-          }
-          className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-5 py-2 rounded-xl shadow hover:scale-105 transition"
-        >
+        <div className="flex gap-3">
 
-          <CameraIcon className="h-5 w-5 inline mr-2" />
+  <button
+    onClick={() => cameraInputRef.current.click()}
+    className="bg-purple-600 text-white px-5 py-2 rounded-xl"
+  >
+    📷 Take Photo
+  </button>
 
-          Take Photo / Choose From Gallery
+  <button
+    onClick={() => galleryInputRef.current.click()}
+    className="bg-blue-600 text-white px-5 py-2 rounded-xl"
+  >
+    🖼 Choose From Gallery
+  </button>
 
-        </button>
+</div>
 
       </div>
 
