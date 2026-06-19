@@ -10,6 +10,7 @@ import ReactMarkdown from "react-markdown";
 
 export default function ChatbotPage() {
   const [input, setInput] = useState("");
+  const [mode, setMode] = useState("tax");
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
@@ -75,10 +76,14 @@ export default function ChatbotPage() {
     setLoading(true);
 
     try {
-      const res = await axios.post("https://ai-tax-agent-backend-1.onrender.com/chat", {
-        message: messageToSend,
-        session_id: "user-session-1",
-      });
+      const res = await axios.post(
+  "https://ai-tax-agent-backend-1.onrender.com/chat",
+  {
+    message: messageToSend,
+    mode: mode,
+    session_id: "user-session-1",
+  }
+);
 
       const reply = res.data.reply || "No reply received.";
       const pending = res.data.context?.pending_trip_confirmation;
@@ -165,6 +170,32 @@ export default function ChatbotPage() {
           </div>
         </div>
 
+        <div className="flex gap-3 mb-4">
+
+  <button
+    onClick={() => setMode("tax")}
+    className={`px-4 py-2 rounded-full shadow ${
+      mode === "tax"
+        ? "bg-blue-600 text-white"
+        : "bg-gray-200 text-gray-700"
+    }`}
+  >
+    Tax Assistant
+  </button>
+
+  <button
+    onClick={() => setMode("help")}
+    className={`px-4 py-2 rounded-full shadow ${
+      mode === "help"
+        ? "bg-purple-600 text-white"
+        : "bg-gray-200 text-gray-700"
+    }`}
+  >
+    App Help
+  </button>
+
+</div>
+
         {/* Chat Area */}
         <div className="flex-1 overflow-y-auto rounded-2xl p-6 bg-gradient-to-br from-gray-50 to-gray-100 shadow-inner space-y-6">
           {history.map((h, idx) => (
@@ -213,7 +244,13 @@ export default function ChatbotPage() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             className="flex-1 px-4 py-2 bg-transparent outline-none text-gray-700 text-sm"
-            placeholder={listening ? "Listening..." : "Ask a tax question..."}
+            placeholder={
+  listening
+    ? "Listening..."
+    : mode === "help"
+    ? "Ask how to use TaxMate..."
+    : "Ask a tax question..."
+}
           />
 
           <button
