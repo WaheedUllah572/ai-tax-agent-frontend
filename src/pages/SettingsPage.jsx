@@ -9,8 +9,9 @@ export default function SettingsPage() {
   const [jurisdiction, setJurisdiction] =
     useState("US");
 
-  const [loading, setLoading] =
-    useState(false);
+  const [loading, setLoading] = useState(false);
+  const [calendarConnected, setCalendarConnected] =
+  useState(false);
 
   useEffect(() => {
 
@@ -23,6 +24,9 @@ export default function SettingsPage() {
         setJurisdiction(
           data.jurisdiction || "US"
         );
+        setCalendarConnected(
+  data.calendar_connected || false
+);
       });
 
   }, []);
@@ -116,6 +120,22 @@ export default function SettingsPage() {
           : "Save Settings"}
 
       </button>
+
+      <div className="mt-6">
+
+  <button
+    onClick={() =>
+      window.location.href =
+        `${BASE_URL}/calendar/connect`
+    }
+    className="bg-purple-600 text-white px-4 py-2 rounded"
+  >
+    {calendarConnected
+      ? "Reconnect Calendar"
+      : "Connect Calendar"}
+  </button>
+
+</div>
 
     </div>
   );
