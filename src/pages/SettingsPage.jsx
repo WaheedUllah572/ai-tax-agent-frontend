@@ -144,9 +144,10 @@ export default function SettingsPage() {
                 </p>
 
                 <p className="text-sm text-gray-600">
-                  {event.start?.dateTime ||
-                    event.start?.date}
-                </p>
+  {new Date(
+    event.start
+  ).toLocaleString()}
+</p>
               </div>
             ))}
           </div>
