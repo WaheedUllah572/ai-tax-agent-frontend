@@ -144,9 +144,14 @@ export default function SettingsPage() {
                 </p>
 
                 <p className="text-sm text-gray-600">
-  {new Date(
-    event.start
-  ).toLocaleString()}
+  {new Date(event.start).toLocaleString(
+    [],
+    {
+      timeZone:
+        event.timezone ||
+        Intl.DateTimeFormat().resolvedOptions().timeZone
+    }
+  )}
 </p>
               </div>
             ))}
