@@ -34,8 +34,15 @@ export default function Dashboard() {
   const BASE_URL =
     "https://ai-tax-agent-backend-1.onrender.com";
 
-  const [analytics, setAnalytics] =
-  useState(null);
+  const [analytics, setAnalytics] = useState({
+  total_receipts: 0,
+  total_spending: 0,
+  top_vendor: "N/A",
+  monthly_data: {},
+  category_data: {},
+  vendor_data: {},
+  needs_review_count: 0
+});
 
 const [reviewCount, setReviewCount] =
   useState(0);
@@ -134,17 +141,13 @@ const [reviewCount, setReviewCount] =
 
   const monthlyChart = {
 
-    labels: Object.keys(
-      analytics.monthly_data
-    ),
+    labels: Object.keys(analytics.monthly_data || {}),
 
     datasets: [
       {
         label: "Monthly Spending",
 
-        data: Object.values(
-          analytics.monthly_data
-        ),
+        data: Object.values(analytics.monthly_data || {}),
       },
     ],
   };
@@ -152,14 +155,14 @@ const [reviewCount, setReviewCount] =
   const categoryChart = {
 
     labels: Object.keys(
-      analytics.category_data
-    ),
+  analytics.category_data || {}
+),
 
     datasets: [
       {
         data: Object.values(
-          analytics.category_data
-        ),
+  analytics.category_data || {}
+),
       },
     ],
   };
@@ -323,7 +326,7 @@ const [reviewCount, setReviewCount] =
             </span>
 
             <span className="text-green-600 font-semibold">
-              ${amount.toFixed(2)}
+              ${Number(amount || 0).toFixed(2)}
             </span>
 
           </div>
