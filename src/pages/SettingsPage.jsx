@@ -18,27 +18,34 @@ export default function SettingsPage() {
     useState([]);
 
   useEffect(() => {
-    fetch(`${BASE_URL}/settings`)
-      .then((res) => res.json())
-      .then((data) => {
-        setJurisdiction(
-          data.jurisdiction || "US"
-        );
+  // Load settings
+  fetch(`${BASE_URL}/settings`)
+    .then((res) => res.json())
+    .then((data) => {
+      setJurisdiction(
+        data.jurisdiction || "US"
+      );
+    });
 
-        setCalendarConnected(
-          data.calendar_connected || false
-        );
-      });
+  // Load calendar connection status
+  fetch(`${BASE_URL}/calendar/status`)
+    .then((res) => res.json())
+    .then((data) => {
+      setCalendarConnected(
+        data.connected
+      );
+    });
 
-    fetch(`${BASE_URL}/calendar/events`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          setEvents(data.events);
-        }
-      });
+  // Load events
+  fetch(`${BASE_URL}/calendar/events`)
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.success) {
+        setEvents(data.events);
+      }
+    });
 
-  }, []);
+}, []);
 
   const saveSettings = async () => {
     setLoading(true);
@@ -112,9 +119,11 @@ export default function SettingsPage() {
       <div className="mt-6">
         <button
           onClick={() =>
-            window.location.href =
-              `${BASE_URL}/calendar/connect`
-          }
+  window.open(
+    `${BASE_URL}/calendar/connect`,
+    "_blank"
+  )
+}
           className="bg-purple-600 text-white px-4 py-2 rounded"
         >
           {calendarConnected
