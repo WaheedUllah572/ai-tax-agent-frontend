@@ -1,7 +1,7 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
-
+import OnboardingPage from "./pages/OnboardingPage";
 import Layout from "./components/Layout";
 import SettingsPage from "./pages/SettingsPage";
 // Core Pages
@@ -23,7 +23,22 @@ import XeroAccounts from "./pages/xero/Accounts";
 
 function ProtectedRoute({ children }) {
   const { user } = useAuth();
-  if (!user) return <Navigate to="/login" replace />;
+
+  if (!user)
+    return <Navigate to="/login" replace />;
+
+  const onboardingCompleted =
+    JSON.parse(
+      localStorage.getItem("onboarding_completed")
+    );
+
+  if (
+    !onboardingCompleted &&
+    window.location.pathname !== "/onboarding"
+  ) {
+    return <Navigate to="/onboarding" replace />;
+  }
+
   return children;
 }
 
@@ -50,6 +65,7 @@ function App() {
         <Route path="/mileage" element={<MileagePage />} />
         <Route path="/reports" element={<ReportsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/onboarding" element={<OnboardingPage />} />
 
         {/* ✅ Xero Routes (NEW) */}
         <Route path="/xero/customers" element={<XeroCustomers />} />

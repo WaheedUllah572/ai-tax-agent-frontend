@@ -5,8 +5,11 @@ const BASE_URL =
   "https://ai-tax-agent-backend-1.onrender.com";
 
 export default function SettingsPage() {
-  const [jurisdiction, setJurisdiction] =
-    useState("US");
+  const [jurisdiction, setJurisdiction] =  useState("US");
+  const [businessName, setBusinessName] = useState("");
+  const [businessType, setBusinessType] = useState("");
+  const [timezone, setTimezone] = useState("Asia/Karachi");
+  const [accountCount, setAccountCount] = useState(1);
 
   const [loading, setLoading] =
     useState(false);
@@ -22,9 +25,11 @@ export default function SettingsPage() {
   fetch(`${BASE_URL}/settings`)
     .then((res) => res.json())
     .then((data) => {
-      setJurisdiction(
-        data.jurisdiction || "US"
-      );
+      setJurisdiction(data.jurisdiction || "US");
+      setBusinessName(data.business_name || "");
+      setBusinessType(data.business_type || "");
+      setTimezone(data.timezone || "Asia/Karachi");
+      setAccountCount(data.account_count || 1);
     });
 
   // Load calendar connection status
@@ -59,8 +64,12 @@ export default function SettingsPage() {
             "application/json"
         },
         body: JSON.stringify({
-          jurisdiction
-        })
+  jurisdiction,
+  business_name: businessName,
+  business_type: businessType,
+  timezone,
+  account_count: accountCount
+})
       }
     );
 
