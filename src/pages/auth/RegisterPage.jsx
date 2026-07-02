@@ -42,7 +42,7 @@ export default function RegisterPage() {
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-green-200 via-white to-blue-200">
       <div className="text-center mb-8 animate-fadeIn">
         <img
-          src="/logo.svg"
+          src="/logo.png"
           alt="TaxMate AI Logo"
           className="mx-auto h-32 w-32 mb-6 rounded-full bg-white object-contain p-2 pt-1 drop-shadow-2xl"
         />

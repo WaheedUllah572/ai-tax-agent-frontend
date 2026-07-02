@@ -47,7 +47,7 @@ export default function LoginPage() {
       {!otpMode && (
         <div className="text-center mb-10 animate-fadeIn">
           <img
-            src="/logo.svg"
+            src="/logo.png"
             alt="TaxMate AI Logo"
             className="mx-auto h-32 w-32 mb-6 rounded-full bg-white object-contain p-2 pt-1 shadow-2xl"
           />

@@ -99,7 +99,7 @@ export default function Layout() {
       <aside className="w-64 bg-gradient-to-b from-indigo-100 to-white border-r border-gray-200 flex flex-col justify-between">
         <div>
           <div className="flex items-center justify-center py-6 border-b border-gray-200">
-            <img src="/logo.svg" className="h-10 w-10 mr-2 rounded-full bg-white shadow" />
+            <img src="/logo.png" className="h-10 w-10 mr-2 rounded-full bg-white shadow" />
             <h1 className="text-xl font-bold text-indigo-700">TaxMind AI</h1>
           </div>
 
