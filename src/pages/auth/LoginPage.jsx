@@ -48,14 +48,14 @@ export default function LoginPage() {
         <div className="text-center mb-10 animate-fadeIn">
           <img
             src="/logo.svg"
-            alt="TaxMind AI Logo"
+            alt="TaxMate AI Logo"
             className="mx-auto h-32 w-32 mb-6 rounded-full bg-white object-contain p-2 pt-1 shadow-2xl"
           />
           <h1 className="text-5xl md:text-6xl font-extrabold text-gray-800 drop-shadow-lg">
-            Welcome to <span className="text-purple-600">TaxMind AI</span>
+            Welcome to <span className="text-purple-600">TaxMate AI</span>
           </h1>
           <p className="mt-4 text-gray-600 max-w-xl mx-auto text-base md:text-lg">
-            🚀 Manage your taxes smarter, faster, and stress-free. Upload receipts, track mileage, and let AI handle the rest.
+            Manage your taxes smarter, faster, and stress-free. Upload receipts, track mileage, and let AI handle the rest.
           </p>
         </div>
       )}
