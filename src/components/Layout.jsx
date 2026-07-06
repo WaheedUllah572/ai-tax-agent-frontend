@@ -57,8 +57,9 @@ export default function Layout() {
 
   const handleLogout = () => {
     localStorage.removeItem("user");
+    localStorage.removeItem("onboarding_completed");
     navigate("/login");
-  };
+};
 
   const menuItems = [
   { name: "Dashboard", path: "/dashboard", icon: <HomeIcon className="h-5 w-5" /> },
@@ -100,7 +101,7 @@ export default function Layout() {
         <div>
           <div className="flex items-center justify-center py-6 border-b border-gray-200">
             <img src="/logo.png" className="h-10 w-10 mr-2 rounded-full bg-white shadow" />
-            <h1 className="text-xl font-bold text-indigo-700">TaxMind AI</h1>
+            <h1 className="text-xl font-bold text-indigo-700">TaxMate AI</h1>
           </div>
 
           <nav className="p-4 space-y-2">
