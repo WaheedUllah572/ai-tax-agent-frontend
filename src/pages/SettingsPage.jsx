@@ -98,6 +98,68 @@ export default function SettingsPage() {
         }
         className="border p-2 rounded w-full"
       >
+
+        <label className="block mt-4 mb-2 font-medium">
+  Business Name
+</label>
+
+<input
+  type="text"
+  value={businessName}
+  onChange={(e) => setBusinessName(e.target.value)}
+  className="border p-2 rounded w-full"
+/>
+
+<label className="block mt-4 mb-2 font-medium">
+  Business Type
+</label>
+
+<input
+  type="text"
+  value={businessType}
+  onChange={(e) => setBusinessType(e.target.value)}
+  className="border p-2 rounded w-full"
+/>
+
+<label className="block mt-4 mb-2 font-medium">
+  Timezone
+</label>
+
+<select
+  value={timezone}
+  onChange={(e) => setTimezone(e.target.value)}
+  className="border p-2 rounded w-full"
+>
+  <option value="Asia/Karachi">Pakistan</option>
+  <option value="Asia/Dubai">UAE</option>
+  <option value="Asia/Kolkata">India</option>
+  <option value="Asia/Singapore">Singapore</option>
+  <option value="America/New_York">New York</option>
+  <option value="America/Chicago">Chicago</option>
+  <option value="America/Denver">Denver</option>
+  <option value="America/Los_Angeles">Los Angeles</option>
+  <option value="Europe/London">London</option>
+  <option value="Europe/Paris">Paris</option>
+  <option value="Australia/Sydney">Sydney</option>
+  <option value="UTC">UTC</option>
+</select>
+
+<label className="block mt-4 mb-2 font-medium">
+  Account Count
+</label>
+
+<select
+  value={accountCount}
+  onChange={(e) => setAccountCount(e.target.value)}
+  className="border p-2 rounded w-full"
+>
+  <option value="1">1 User</option>
+  <option value="2-5">2–5 Users</option>
+  <option value="6-10">6–10 Users</option>
+  <option value="11-25">11–25 Users</option>
+  <option value="26-50">26–50 Users</option>
+  <option value="50+">50+ Users</option>
+</select>
         <option value="US">
           United States
         </option>
