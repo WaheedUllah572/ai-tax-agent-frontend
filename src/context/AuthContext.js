@@ -57,11 +57,22 @@ export const AuthProvider = ({ children }) => {
       }
 
       if (data["login_success"]) {
-        const userData = { email };
-        setUser(userData);
-        localStorage.setItem("user", JSON.stringify(userData));
-        return { success: true };
-      }
+  const userData = {
+    name: data.name,
+    email: data.email,
+    role: data.role,
+  };
+
+  setUser(userData);
+  localStorage.setItem("user", JSON.stringify(userData));
+
+  setPendingEmail(null);
+
+  return {
+    success: true,
+    role: data.role,
+  };
+}
 
       return { error: true };
     } catch {

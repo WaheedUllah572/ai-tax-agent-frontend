@@ -23,8 +23,13 @@ export default function LoginPage() {
     }
 
     if (result?.success) {
-      navigate("/dashboard");
-    } else {
+  if (result.role === "accountant") {
+    navigate("/accountant");
+  } else {
+    navigate("/dashboard");
+  }
+}
+    else {
       alert(result?.error || "Invalid login ❌");
     }
   };
@@ -35,8 +40,13 @@ export default function LoginPage() {
     const result = await verify2FA(otp);
 
     if (result?.success) {
-      navigate("/dashboard");
-    } else {
+  if (result.role === "accountant") {
+    navigate("/accountant");
+  } else {
+    navigate("/dashboard");
+  }
+}
+    else {
       alert("Invalid OTP ❌");
     }
   };

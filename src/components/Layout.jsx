@@ -20,6 +20,7 @@ export default function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
   const [userName, setUserName] = useState("User");
+  const [userRole, setUserRole] = useState("owner");
   const [xeroConnected, setXeroConnected] = useState(false);
 
   // ✅ FIXED: Use ONLY one env variable (NO import.meta, NO localhost fallback)
@@ -29,10 +30,15 @@ export default function Layout() {
 
   // Load user
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    if (storedUser?.name) setUserName(storedUser.name);
-    else if (storedUser?.username) setUserName(storedUser.username);
-  }, []);
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+
+  if (storedUser?.name)
+    setUserName(storedUser.name);
+  else if (storedUser?.username)
+    setUserName(storedUser.username);
+
+  setUserRole(storedUser?.role || "owner");
+}, []);
 
   // Check Xero status
   useEffect(() => {
@@ -67,6 +73,32 @@ export default function Layout() {
   { name: "Receipts", path: "/receipts", icon: <DocumentArrowUpIcon className="h-5 w-5" /> },
   { name: "Mileage", path: "/mileage", icon: <MapIcon className="h-5 w-5" /> },
   { name: "Reports", path: "/reports", icon: <ChartBarIcon className="h-5 w-5" /> },
+
+  ...(userRole === "accountant"
+  ? [{
+      name: "Accountant Portal",
+      path: "/accountant",
+      icon: <ChartBarIcon className="h-5 w-5" />,
+    }]
+  : []),
+
+{
+  name: "Review Receipts",
+  path: "/accountant/receipts",
+  icon: <DocumentArrowUpIcon className="h-5 w-5" />,
+},
+
+{
+  name: "Transactions",
+  path: "/accountant/transactions",
+  icon: <CurrencyDollarIcon className="h-5 w-5" />,
+},
+
+{
+  name: "Mileage Logs",
+  path: "/accountant/mileage",
+  icon: <MapIcon className="h-5 w-5" />,
+},
 
   {
     name: "Settings",

@@ -5,7 +5,7 @@ import { useAuth } from "./context/AuthContext";
 import OnboardingPage from "./pages/OnboardingPage";
 import Layout from "./components/Layout";
 import SettingsPage from "./pages/SettingsPage";
-
+import AccountantDashboard from "./pages/accountant/AccountantDashboard";
 import Dashboard from "./pages/Dashboard";
 import ChatbotPage from "./pages/ChatbotPage";
 import JoinTaxMate from "./pages/JoinTaxMate";
@@ -16,7 +16,9 @@ import RegisterPage from "./pages/auth/RegisterPage";
 import ReceiptsPage from "./pages/ReceiptsPage";
 import MileagePage from "./pages/MileagePage";
 import ReportsPage from "./pages/ReportsPage";
-
+import AccountantReceipts from "./pages/accountant/AccountantReceipts";
+import AccountantTransactions from "./pages/accountant/AccountantTransactions";
+import AccountantMileage from "./pages/accountant/AccountantMileage";
 import XeroCustomers from "./pages/xero/Customers";
 import XeroInvoices from "./pages/xero/Invoices";
 import XeroAccounts from "./pages/xero/Accounts";
@@ -73,6 +75,25 @@ function App() {
         <Route path="/receipts" element={<ReceiptsPage />} />
         <Route path="/mileage" element={<MileagePage />} />
         <Route path="/reports" element={<ReportsPage />} />
+        <Route
+  path="/accountant"
+  element={<AccountantDashboard />}
+/>
+
+<Route
+  path="/accountant/receipts"
+  element={<AccountantReceipts />}
+/>
+
+<Route
+  path="/accountant/transactions"
+  element={<AccountantTransactions />}
+/>
+
+<Route
+  path="/accountant/mileage"
+  element={<AccountantMileage />}
+/>
         <Route path="/settings" element={<SettingsPage />} />
 
         <Route path="/xero/customers" element={<XeroCustomers />} />
