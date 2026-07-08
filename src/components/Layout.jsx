@@ -79,7 +79,13 @@ export default function Layout() {
       name: "Accountant Portal",
       path: "/accountant",
       icon: <ChartBarIcon className="h-5 w-5" />,
-    }]
+    },
+  {
+    name: "Clients",
+    path: "/accountant/clients",
+    icon: <UserPlusIcon className="h-5 w-5" />,
+},
+  ]
   : []),
 
 {

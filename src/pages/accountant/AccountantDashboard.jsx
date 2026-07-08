@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 const BASE_URL =
   process.env.REACT_APP_API_BASE_URL ||
@@ -54,6 +55,16 @@ export default function AccountantDashboard() {
           </p>
         </div>
 
+      </div>
+
+      {/* Clients Button */}
+      <div className="mt-10">
+        <Link
+          to="/accountant/clients"
+          className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition"
+        >
+          View All Clients →
+        </Link>
       </div>
 
     </div>

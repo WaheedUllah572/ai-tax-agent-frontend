@@ -16,6 +16,8 @@ import RegisterPage from "./pages/auth/RegisterPage";
 import ReceiptsPage from "./pages/ReceiptsPage";
 import MileagePage from "./pages/MileagePage";
 import ReportsPage from "./pages/ReportsPage";
+import Clients from "./pages/accountant/Clients";
+import ClientProfile from "./pages/accountant/ClientProfile";
 import AccountantReceipts from "./pages/accountant/AccountantReceipts";
 import AccountantTransactions from "./pages/accountant/AccountantTransactions";
 import AccountantMileage from "./pages/accountant/AccountantMileage";
@@ -78,6 +80,16 @@ function App() {
         <Route
   path="/accountant"
   element={<AccountantDashboard />}
+/>
+
+<Route
+  path="/accountant/clients"
+  element={<Clients />}
+/>
+
+<Route
+  path="/accountant/client/:email"
+  element={<ClientProfile />}
 />
 
 <Route
