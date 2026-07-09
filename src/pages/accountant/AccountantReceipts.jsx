@@ -384,11 +384,7 @@ export default function AccountantReceipts() {
 
       )}
 
-    </div>
-  );
-}
-
-{previewReceipt && (
+      {previewReceipt && (
 
 <div className="fixed inset-0 bg-black/70 flex justify-center items-center z-50">
 
@@ -420,3 +416,9 @@ Close
 </div>
 
 )}
+
+    </div>
+    
+  );
+}
+
