@@ -22,25 +22,57 @@ export default function ReportsPage() {
     process.env.REACT_APP_API_BASE_URL?.trim() ||
     "https://ai-tax-agent-backend-1.onrender.com";
 
-  fetch(`${BASE_URL}/reports-summary`)
-    .then((res) => res.json())
-    .then((data) => setSummary(data.summary || {}))
+  fetch(`${BASE_URL}/reports/analytics`)
+  .then((res) => res.json())
+  .then((data) =>
+    setSummary({
+      Receipts: data.total_receipts,
+      Spending: data.total_spending,
+      Categories: Object.keys(data.category_data || {}).length,
+      "Needs Review": data.needs_review_count,
+    })
+  )
     .catch(() => {});
 }, []);
   const downloadPDF = () => {
-    const doc = new jsPDF();
-    doc.text("Expense Summary", 20, 20);
-    Object.entries(summary).forEach(([key, val], i) =>
-      doc.text(`${key}: $${val.toFixed(2)}`, 20, 40 + i * 10)
-    );
-    doc.save("Expense_Summary.pdf");
-  };
+  const doc = new jsPDF();
+
+  doc.setFontSize(20);
+  doc.text("TaxMate AI", 20, 20);
+
+  doc.setFontSize(16);
+  doc.text("Expense Report", 20, 32);
+
+  doc.setFontSize(11);
+  doc.text(
+    `Generated: ${new Date().toLocaleString()}`,
+    20,
+    42
+  );
+
+  let y = 60;
+
+  Object.entries(summary).forEach(([key, value]) => {
+    doc.text(`${key}: ${value}`, 20, y);
+    y += 10;
+  });
+
+  doc.save("TaxMate_Report.pdf");
+};
+
+  const downloadCSV = () => {
+  const BASE_URL =
+    process.env.REACT_APP_API_BASE_URL?.trim() ||
+    "https://ai-tax-agent-backend-1.onrender.com";
+
+  window.open(`${BASE_URL}/reports/tax-report`, "_blank");
+};
 
   const emailReport = () => {
     const subject = encodeURIComponent("Your Expense Summary");
     const body = encodeURIComponent(
       Object.entries(summary)
-        .map(([k, v]) => `${k}: $${v.toFixed(2)}`)
+        .map(([k,v]) => `${k}: ${v}`)
         .join("\n")
     );
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
@@ -66,6 +98,38 @@ export default function ReportsPage() {
         <h3 className="text-2xl font-semibold text-gray-800 mb-4">
           Expense Breakdown
         </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+
+  <div className="bg-white rounded-xl shadow p-6">
+    <p className="text-gray-500">Receipts</p>
+    <h2 className="text-3xl font-bold">
+      {summary.Receipts || 0}
+    </h2>
+  </div>
+
+  <div className="bg-white rounded-xl shadow p-6">
+    <p className="text-gray-500">Total Spending</p>
+    <h2 className="text-3xl font-bold text-green-600">
+      ${summary.Spending || 0}
+    </h2>
+  </div>
+
+  <div className="bg-white rounded-xl shadow p-6">
+    <p className="text-gray-500">Categories</p>
+    <h2 className="text-3xl font-bold">
+      {summary.Categories || 0}
+    </h2>
+  </div>
+
+  <div className="bg-white rounded-xl shadow p-6">
+    <p className="text-gray-500">Needs Review</p>
+    <h2 className="text-3xl font-bold text-red-500">
+      {summary["Needs Review"] || 0}
+    </h2>
+  </div>
+
+</div>
         <ResponsiveContainer width="100%" height={300}>
           <PieChart>
             <Pie
@@ -94,6 +158,13 @@ export default function ReportsPage() {
           <DocumentArrowDownIcon className="h-5 w-5" />
           Download PDF
         </button>
+
+        <button
+  onClick={downloadCSV}
+  className="flex items-center justify-center gap-2 px-5 py-3 rounded-lg text-white font-medium bg-gradient-to-r from-indigo-500 to-blue-600 hover:scale-105 transition"
+>
+  Download CSV
+</button>
         <button
           onClick={emailReport}
           className="flex items-center justify-center gap-2 px-5 py-3 rounded-lg text-white font-medium bg-gradient-to-r from-green-500 to-teal-600 hover:scale-105 transition"
