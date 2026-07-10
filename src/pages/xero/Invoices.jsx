@@ -13,7 +13,7 @@ export default function XeroInvoices() {
   useEffect(() => {
     axios
       .get(`${BASE_URL}/xero/invoices`)
-      .then((res) => setInvoices(res.data.invoices || []))
+      .then((res) => setInvoices(res.data || []))
       .catch(() => setInvoices([]))
       .finally(() => setLoading(false));
   }, [BASE_URL]);

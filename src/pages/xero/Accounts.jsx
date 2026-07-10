@@ -27,7 +27,7 @@ export default function XeroAccounts() {
   useEffect(() => {
     axios
       .get(`${BASE_URL}/xero/accounts`)
-      .then((res) => setAccounts(res.data.accounts || []))
+      .then((res) => setAccounts(res.data || []))
       .catch(() => setAccounts([]))
       .finally(() => setLoading(false));
   }, [BASE_URL]);

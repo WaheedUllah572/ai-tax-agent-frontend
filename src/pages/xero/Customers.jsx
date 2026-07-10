@@ -15,7 +15,7 @@ export default function XeroCustomers() {
       .get(`${BASE_URL}/xero/customers`)
       .then((res) => {
         // ✅ FIX: extract correct array from backend response
-        setCustomers(res.data?.customers || []);
+        setCustomers(res.data || []);
       })
       .catch(() => setCustomers([]))
       .finally(() => setLoading(false));
