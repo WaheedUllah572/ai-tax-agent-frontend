@@ -213,9 +213,7 @@ export default function ChatbotPage() {
                     : <ReactMarkdown>{h.bot}</ReactMarkdown>}
 
                   {/* ✅ Confirmation Buttons */}
-                  <h4 className="font-semibold mb-2">
-Trip Summary
-</h4>
+                  
                   {h.pendingConfirmation && (
                     <div className="mt-4 flex gap-3">
                       <button
