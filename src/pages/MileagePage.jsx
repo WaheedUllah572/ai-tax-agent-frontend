@@ -28,7 +28,8 @@ export default function MileagePage() {
   miles: t.distance_miles,
   duration: t.duration_minutes,
   deduction: t.deductible_amount,
-  method: "AI Tracking"
+  method: "AI Tracking",
+status: t.status || "Completed"
 }));
         setTrips(formattedTrips);
       })
@@ -139,6 +140,9 @@ ${totalDeduction.toFixed(2)}
                 <tr>
                   <th className="px-6 py-3 text-left font-semibold text-gray-700">Date</th>
                   <th className="px-6 py-3 text-left font-semibold text-gray-700">
+  Start
+</th>
+                  <th className="px-6 py-3 text-left font-semibold text-gray-700">
   Destination
 </th>
 
@@ -161,6 +165,10 @@ ${totalDeduction.toFixed(2)}
 <th className="px-6 py-3 text-left font-semibold text-gray-700">
   Tax Deduction
 </th>
+
+<th className="px-6 py-3 text-left font-semibold text-gray-700">
+  Status
+</th>
                   <th className="px-6 py-3 text-center font-semibold text-gray-700">Actions</th>
                 </tr>
               </thead>
@@ -168,6 +176,9 @@ ${totalDeduction.toFixed(2)}
                 {trips.map((trip) => (
                   <tr key={trip.id}>
                     <td className="px-6 py-3">{trip.date}</td>
+                    <td className="px-6 py-3">
+  {trip.start}
+</td>
                     <td className="px-6 py-3">
   {trip.destination}
 </td>
@@ -181,15 +192,20 @@ ${totalDeduction.toFixed(2)}
 </td>
 
 <td className="px-6 py-3">
-  {trip.miles} mi
+  {trip.miles} m{Number(trip.miles).toFixed(2)} mi
 </td>
 
 <td className="px-6 py-3">
-  {trip.duration} min
+  {Number(trip.duration).toFixed(1)} min
 </td>
 
 <td className="px-6 py-3 font-semibold text-green-600">
-  ${trip.deduction}
+  ${Number(trip.deduction).toFixed(2)}
+</td>
+<td className="px-6 py-3">
+  <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs">
+    {trip.status}
+  </span>
 </td>
                     <td className="px-6 py-3 text-center">
                       <button

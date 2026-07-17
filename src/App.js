@@ -8,7 +8,7 @@ import SettingsPage from "./pages/SettingsPage";
 import AccountantDashboard from "./pages/accountant/AccountantDashboard";
 import Dashboard from "./pages/Dashboard";
 import ChatbotPage from "./pages/ChatbotPage";
-import JoinTaxMate from "./pages/JoinTaxMate";
+import JoinRefundPilot from "./pages/JoinRefundPilot";
 import SubscriptionSuccess from "./pages/SubscriptionSuccess";
 import SubscriptionCancel from "./pages/SubscriptionCancel";
 import LoginPage from "./pages/auth/LoginPage";
@@ -73,7 +73,7 @@ function App() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/chatbot" element={<ChatbotPage />} />
-        <Route path="/join" element={<JoinTaxMate />} />
+        <Route path="/join" element={<JoinRefundPilot />} />
         <Route path="/receipts" element={<ReceiptsPage />} />
         <Route path="/mileage" element={<MileagePage />} />
         <Route path="/reports" element={<ReportsPage />} />

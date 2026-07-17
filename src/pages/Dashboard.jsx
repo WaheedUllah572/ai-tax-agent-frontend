@@ -172,7 +172,7 @@ const [reviewCount, setReviewCount] =
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-white to-purple-100 p-8">
 
       <h1 className="text-5xl font-extrabold text-center mb-12 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-        TaxMate Analytics Dashboard
+        RefundPilot Business Dashboard
       </h1>
 
       {/* GMAIL SECTION */}
@@ -183,11 +183,11 @@ const [reviewCount, setReviewCount] =
           <div>
 
             <h2 className="text-2xl font-bold mb-2">
-              Gmail Receipt Import
+              Email & Receipt Center
             </h2>
 
             <p className="text-gray-600">
-              Automatically scan Gmail for receipts and business expenses.
+              Connect your email to automatically import receipts and invoices.
             </p>
 
           </div>
@@ -227,12 +227,12 @@ const [reviewCount, setReviewCount] =
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
 
         <Card
-          title="Total Receipts"
+          title="Receipts Imported"
           value={analytics.total_receipts}
         />
 
         <Card
-          title="Total Spending"
+          title="Business Expenses"
           value={`$${analytics.total_spending}`}
         />
 
@@ -242,7 +242,7 @@ const [reviewCount, setReviewCount] =
         />
 
         <Card
-  title="Needs Review"
+  title="Pending Review"
   value={reviewCount}
 />
 
@@ -279,11 +279,11 @@ const [reviewCount, setReviewCount] =
         <div className="flex items-center justify-between mb-4">
 
           <h2 className="text-xl font-bold">
-            AI Tax Reports
+            Business Reports
           </h2>
 
           <span className="text-xs bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full">
-            IRS Ready
+            Export Ready
           </span>
 
         </div>

@@ -19,25 +19,25 @@ export default function Navbar() {
               <div className="bg-white h-full w-full rounded-2xl flex items-center justify-center">
                 <img
                   src="/logo.svg"
-                  alt="TaxMind AI Logo"
+                  alt="RefundPilot Logo"
                   className="h-9 w-9 object-contain transition-transform duration-300 group-hover:scale-110"
                 />
               </div>
             </div>
             <div>
               <h1 className="text-2xl font-extrabold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent tracking-tight flex items-center gap-1">
-                TaxMind AI
+                RefundPilot AI
                 <Sparkles className="h-5 w-5 text-purple-500 animate-pulse" />
               </h1>
               <p className="text-xs text-gray-500 font-medium">
-                Welcome to <span className="text-indigo-500 font-semibold">TaxMate</span> — meet{" "}
+                Welcome to <span className="text-indigo-500 font-semibold">RefundPilot</span> — meet{" "}
                 <span className="text-purple-600 font-semibold">Max 👋</span>
               </p>
             </div>
           </div>
 
           {/* Right Side */}
-          <div className="flex items-center gap-5">
+          <div className="flex items-center gap-5">Welcome to RefundPilot — meet
             {user && (
               <div className="hidden sm:flex items-center gap-3 pr-2">
                 {/* Avatar */}

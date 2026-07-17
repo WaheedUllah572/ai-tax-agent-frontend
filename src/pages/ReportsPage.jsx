@@ -38,7 +38,7 @@ export default function ReportsPage() {
   const doc = new jsPDF();
 
   doc.setFontSize(20);
-  doc.text("TaxMate AI", 20, 20);
+  doc.text("RefundPilot", 20, 20);
 
   doc.setFontSize(16);
   doc.text("Expense Report", 20, 32);
@@ -57,7 +57,7 @@ export default function ReportsPage() {
     y += 10;
   });
 
-  doc.save("TaxMate_Report.pdf");
+  doc.save("RefundPilot_Report.pdf");
 };
 
   const downloadCSV = () => {
@@ -87,10 +87,10 @@ export default function ReportsPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-8">
       <div className="text-center mb-10">
         <h2 className="text-4xl font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-          Reports Center
+          Business Reports
         </h2>
         <p className="text-gray-600">
-          AI-powered insights from your receipts and mileage.
+          Generate professional reports for taxes, bookkeeping and business performance.
         </p>
       </div>
 
@@ -156,21 +156,21 @@ export default function ReportsPage() {
           className="flex items-center justify-center gap-2 px-5 py-3 rounded-lg text-white font-medium bg-gradient-to-r from-blue-500 to-purple-600 hover:scale-105 transition"
         >
           <DocumentArrowDownIcon className="h-5 w-5" />
-          Download PDF
+          Export PDF
         </button>
 
         <button
   onClick={downloadCSV}
   className="flex items-center justify-center gap-2 px-5 py-3 rounded-lg text-white font-medium bg-gradient-to-r from-indigo-500 to-blue-600 hover:scale-105 transition"
 >
-  Download CSV
+  Export CSV
 </button>
         <button
           onClick={emailReport}
           className="flex items-center justify-center gap-2 px-5 py-3 rounded-lg text-white font-medium bg-gradient-to-r from-green-500 to-teal-600 hover:scale-105 transition"
         >
           <EnvelopeIcon className="h-5 w-5" />
-          Email to Accountant
+          Share with Accountant
         </button>
       </div>
     </div>

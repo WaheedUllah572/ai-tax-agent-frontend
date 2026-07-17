@@ -58,14 +58,14 @@ export default function LoginPage() {
         <div className="text-center mb-10 animate-fadeIn">
           <img
             src="/logo.png"
-            alt="TaxMate AI Logo"
+            alt="RefundPilot Logo"
             className="mx-auto h-32 w-32 mb-6 rounded-full bg-white object-contain p-2 pt-1 shadow-2xl"
           />
           <h1 className="text-5xl md:text-6xl font-extrabold text-gray-800 drop-shadow-lg">
-            Welcome to <span className="text-purple-600">TaxMate AI</span>
+            Welcome to <span className="text-purple-600">RefundPilot</span>
           </h1>
           <p className="mt-4 text-gray-600 max-w-xl mx-auto text-base md:text-lg">
-            Manage your taxes smarter, faster, and stress-free. Upload receipts, track mileage, and let AI handle the rest.
+            AI-powered bookkeeping and tax management for modern businesses. Track receipts, mileage, invoices, and deductions—all in one place.
           </p>
         </div>
       )}
@@ -82,7 +82,7 @@ export default function LoginPage() {
           </div>
 
           <h2 className="text-2xl font-bold text-center text-gray-800 mb-4">
-            Sign in to Continue 👋
+            Sign in to your RefundPilot account
           </h2>
 
           <form onSubmit={handleLogin} className="space-y-4">
@@ -114,7 +114,7 @@ export default function LoginPage() {
               type="submit"
               className="w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white py-3 rounded-xl font-semibold shadow-md hover:shadow-lg transition transform hover:-translate-y-0.5"
             >
-              🔑 Login
+              Sign In
             </button>
           </form>
 
@@ -129,7 +129,7 @@ export default function LoginPage() {
         // 🔹 2FA SCREEN
         <div className="w-full max-w-md bg-white/80 backdrop-blur-lg p-8 rounded-3xl shadow-2xl border border-gray-200 text-center">
           <h2 className="text-3xl font-bold mb-4 text-gray-800">
-            Enter 2FA Code 🔐
+            Two-Factor Authentication
           </h2>
 
           <p className="text-gray-600 mb-4">We sent a 6-digit code to your email.</p>
@@ -149,7 +149,7 @@ export default function LoginPage() {
               type="submit"
               className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-xl font-semibold shadow-md hover:shadow-lg transition transform hover:-translate-y-0.5"
             >
-              Verify Code
+              Verify & Continue
             </button>
           </form>
 

@@ -137,7 +137,7 @@ export default function ChatbotPage() {
           <h2 className="text-3xl font-extrabold flex items-center gap-2">
             🤖{" "}
             <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text drop-shadow">
-              Max, your AI Tax Agent
+              Max — Your RefundPilot AI Assistant
             </span>
           </h2>
 
@@ -180,7 +180,7 @@ export default function ChatbotPage() {
         : "bg-gray-200 text-gray-700"
     }`}
   >
-    Tax Assistant
+    Tax Expert
   </button>
 
   <button
@@ -191,7 +191,7 @@ export default function ChatbotPage() {
         : "bg-gray-200 text-gray-700"
     }`}
   >
-    App Help
+    RefundPilot Help
   </button>
 
 </div>
@@ -213,6 +213,9 @@ export default function ChatbotPage() {
                     : <ReactMarkdown>{h.bot}</ReactMarkdown>}
 
                   {/* ✅ Confirmation Buttons */}
+                  <h4 className="font-semibold mb-2">
+Trip Summary
+</h4>
                   {h.pendingConfirmation && (
                     <div className="mt-4 flex gap-3">
                       <button
@@ -248,8 +251,8 @@ export default function ChatbotPage() {
   listening
     ? "Listening..."
     : mode === "help"
-    ? "Ask how to use TaxMate..."
-    : "Ask a tax question..."
+    ? "Ask how to use RefundPilot features..."
+    : "Ask Max anything about your business..."
 }
           />
 

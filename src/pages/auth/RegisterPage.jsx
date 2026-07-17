@@ -48,14 +48,14 @@ navigate("/login");
       <div className="text-center mb-8 animate-fadeIn">
         <img
           src="/logo.png"
-          alt="TaxMate AI Logo"
+          alt="RefundPilot Logo"
           className="mx-auto h-32 w-32 mb-6 rounded-full bg-white object-contain p-2 pt-1 drop-shadow-2xl"
         />
         <h1 className="text-5xl md:text-6xl font-extrabold text-gray-800 drop-shadow-lg">
-          Create your <span className="text-green-600">TaxMate AI</span> Account
+          Create your <span className="text-green-600">RefundPilot</span> Workspace
         </h1>
         <p className="mt-3 text-gray-600 max-w-xl mx-auto text-lg">
-          Sign up today to manage taxes smarter, track expenses, upload receipts, and get AI-powered tips.
+          Create your secure RefundPilot workspace to manage bookkeeping, receipts, mileage, tax deductions, and AI-powered financial assistance.
         </p>
       </div>
 
@@ -69,7 +69,7 @@ navigate("/login");
         </div>
 
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-2">
-          Join TaxMate AI
+          Create Your Account
         </h2>
 
         <form onSubmit={handleRegister} className="space-y-4">
@@ -140,7 +140,7 @@ navigate("/login");
             type="submit"
             className="w-full bg-gradient-to-r from-green-500 to-blue-500 text-white py-3 rounded-xl font-semibold shadow-md hover:shadow-lg transition transform hover:-translate-y-0.5"
           >
-            ✨ Register
+            Create Account
           </button>
         </form>
 

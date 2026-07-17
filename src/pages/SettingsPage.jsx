@@ -8,8 +8,7 @@ export default function SettingsPage() {
   const [jurisdiction, setJurisdiction] =  useState("US");
   const [businessName, setBusinessName] = useState("");
   const [businessType, setBusinessType] = useState("");
-  const [timezone, setTimezone] = useState("Asia/Karachi");
-  const [accountCount, setAccountCount] = useState(1);
+  const [country, setCountry] = useState("United States");
 
   const [loading, setLoading] =
     useState(false);
@@ -28,8 +27,7 @@ export default function SettingsPage() {
       setJurisdiction(data.jurisdiction || "US");
       setBusinessName(data.business_name || "");
       setBusinessType(data.business_type || "");
-      setTimezone(data.timezone || "Asia/Karachi");
-      setAccountCount(data.account_count || 1);
+      setCountry(data.country || "United States");
     });
 
   // Load calendar connection status
@@ -67,8 +65,7 @@ export default function SettingsPage() {
   jurisdiction,
   business_name: businessName,
   business_type: businessType,
-  timezone,
-  account_count: accountCount
+  country,
 })
       }
     );
@@ -82,8 +79,8 @@ export default function SettingsPage() {
     <div className="max-w-xl mx-auto mt-10 bg-white p-6 rounded-xl shadow">
 
       <h1 className="text-2xl font-bold mb-6">
-        Tax Settings
-      </h1>
+  RefundPilot Settings
+</h1>
 
       <label className="block mb-2 font-medium">
         Tax Jurisdiction
@@ -133,45 +130,40 @@ export default function SettingsPage() {
   Business Type
 </label>
 
-<input
-  type="text"
+<select
   value={businessType}
   onChange={(e) => setBusinessType(e.target.value)}
   className="border p-2 rounded w-full"
-/>
-
-<label className="block mt-4 mb-2 font-medium">
-  Timezone
-</label>
-
-<select
-  value={timezone}
-  onChange={(e) => setTimezone(e.target.value)}
-  className="border p-2 rounded w-full"
 >
-  <option value="Asia/Karachi">Pakistan</option>
-  <option value="Asia/Dubai">UAE</option>
-  <option value="America/New_York">New York</option>
-  <option value="Europe/London">London</option>
-  <option value="UTC">UTC</option>
+  <option value="">Select Business Type</option>
+
+  <option value="Accountant">Accountant</option>
+  <option value="Electrician">Electrician</option>
+  <option value="Plumber">Plumber</option>
+  <option value="Contractor">Contractor</option>
+  <option value="Consultant">Consultant</option>
+  <option value="Real Estate">Real Estate</option>
+  <option value="Restaurant">Restaurant</option>
+  <option value="Retail">Retail</option>
+  <option value="Healthcare">Healthcare</option>
+  <option value="Other">Other</option>
 </select>
 
 <label className="block mt-4 mb-2 font-medium">
-  Account Count
+  Country
 </label>
 
 <select
-  value={accountCount}
-  onChange={(e) => setAccountCount(e.target.value)}
+  value={country}
+  onChange={(e)=>setCountry(e.target.value)}
   className="border p-2 rounded w-full"
 >
-  <option value="1">1 User</option>
-  <option value="2-5">2–5 Users</option>
-  <option value="6-10">6–10 Users</option>
-  <option value="11-25">11–25 Users</option>
-  <option value="26-50">26–50 Users</option>
-  <option value="50+">50+ Users</option>
+  <option value="United States">United States</option>
+  <option value="America/Toronto">Canada</option>
+  <option value="Europe/London">United Kingdom</option>
+  <option value="Australia/Sydney">Australia</option>
 </select>
+
 
       <button
         onClick={saveSettings}

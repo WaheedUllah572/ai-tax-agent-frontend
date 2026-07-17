@@ -67,7 +67,7 @@ export default function Sidebar() {
           <img src="/logo.svg" alt="TaxMind AI Logo" className="h-full w-full object-contain p-2 pt-1" />
         </div>
         <span className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 drop-shadow-md">
-          TaxMind AI
+          RefundPilot
         </span>
       </div>
 
