@@ -236,7 +236,7 @@ export default function Layout() {
       <div className="flex-1 flex flex-col">
         <header className="flex justify-between items-center bg-white border-b border-gray-200 px-6 py-4 shadow-sm sticky top-0">
           <h2 className="text-xl font-semibold text-gray-700">
-            Welcome to TaxMate — meet <span className="text-indigo-600">Max</span> 👋
+            Welcome to RefundPilot — meet <span className="text-indigo-600">Max</span> 👋
           </h2>
           <div className="flex items-center gap-3">
             <span className="text-sm text-gray-500">Hello, {userName} 👋</span>
