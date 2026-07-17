@@ -3,7 +3,7 @@ import axios from "axios";
 import { CreditCardIcon, BoltIcon, ShieldCheckIcon } from "@heroicons/react/24/solid";
 import Lottie from "lottie-react";
 
-export default function JoinTaxMate() {
+export default function JoinRefundPilot() {
   const [accounts, setAccounts] = useState(0);
   const [quickbooks, setQuickbooks] = useState(false);
   const [loading, setLoading] = useState(false);
