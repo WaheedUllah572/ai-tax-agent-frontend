@@ -5,226 +5,445 @@ const BASE_URL =
   "https://ai-tax-agent-backend-1.onrender.com";
 
 export default function SettingsPage() {
-  const [jurisdiction, setJurisdiction] =  useState("US");
+  const [jurisdiction, setJurisdiction] = useState("US");
   const [businessName, setBusinessName] = useState("");
   const [businessType, setBusinessType] = useState("");
   const [country, setCountry] = useState("United States");
 
-  const [loading, setLoading] =
-    useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const [calendarConnected, setCalendarConnected] =
-    useState(false);
+  // Connection statuses
+  const [gmailConnected, setGmailConnected] = useState(false);
+  const [calendarConnected, setCalendarConnected] = useState(false);
+  const [xeroConnected, setXeroConnected] = useState(false);
 
-  const [events, setEvents] =
-    useState([]);
+  const [events, setEvents] = useState([]);
 
   useEffect(() => {
-  // Load settings
-  fetch(`${BASE_URL}/settings`)
-    .then((res) => res.json())
-    .then((data) => {
-      setJurisdiction(data.jurisdiction || "US");
-      setBusinessName(data.business_name || "");
-      setBusinessType(data.business_type || "");
-      setCountry(data.country || "United States");
-    });
-
-  // Load calendar connection status
-  fetch(`${BASE_URL}/calendar/status`)
-    .then((res) => res.json())
-    .then((data) => {
-      setCalendarConnected(
-        data.connected
+    // ==============================
+    // LOAD BUSINESS SETTINGS
+    // ==============================
+    fetch(`${BASE_URL}/settings`)
+      .then((res) => res.json())
+      .then((data) => {
+        setJurisdiction(data.jurisdiction || "US");
+        setBusinessName(data.business_name || "");
+        setBusinessType(data.business_type || "");
+        setCountry(data.country || "United States");
+      })
+      .catch((err) =>
+        console.error("Settings load error:", err)
       );
-    });
 
-  // Load events
-  fetch(`${BASE_URL}/calendar/events`)
-    .then((res) => res.json())
-    .then((data) => {
-      if (data.success) {
-        setEvents(data.events);
-      }
-    });
+    // ==============================
+    // GMAIL STATUS
+    // ==============================
+    fetch(`${BASE_URL}/gmail/status`)
+      .then((res) => res.json())
+      .then((data) => {
+        setGmailConnected(data.connected === true);
+      })
+      .catch(() => {
+        setGmailConnected(false);
+      });
 
-}, []);
+    // ==============================
+    // CALENDAR STATUS
+    // ==============================
+    fetch(`${BASE_URL}/calendar/status`)
+      .then((res) => res.json())
+      .then((data) => {
+        setCalendarConnected(data.connected === true);
+      })
+      .catch(() => {
+        setCalendarConnected(false);
+      });
 
+    // ==============================
+    // XERO STATUS
+    // ==============================
+    fetch(`${BASE_URL}/xero/status`)
+      .then((res) => res.json())
+      .then((data) => {
+        setXeroConnected(data.connected === true);
+      })
+      .catch(() => {
+        setXeroConnected(false);
+      });
+
+    // ==============================
+    // LOAD UPCOMING EVENTS
+    // ==============================
+    fetch(`${BASE_URL}/calendar/events`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setEvents(data.events || []);
+        }
+      })
+      .catch((err) =>
+        console.error("Calendar events error:", err)
+      );
+  }, []);
+
+  // ==============================
+  // SAVE SETTINGS
+  // ==============================
   const saveSettings = async () => {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    await fetch(
-      `${BASE_URL}/settings`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type":
-            "application/json"
-        },
-        body: JSON.stringify({
-  jurisdiction,
-  business_name: businessName,
-  business_type: businessType,
-  country,
-})
+      const response = await fetch(
+        `${BASE_URL}/settings`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            jurisdiction,
+            business_name: businessName,
+            business_type: businessType,
+            country,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Could not save settings");
       }
-    );
 
-    setLoading(false);
-
-    alert("Settings Saved");
+      alert("Settings saved successfully.");
+    } catch (error) {
+      console.error(error);
+      alert("Could not save settings.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="max-w-xl mx-auto mt-10 bg-white p-6 rounded-xl shadow">
+    <div className="max-w-3xl mx-auto py-10">
 
-      <h1 className="text-2xl font-bold mb-6">
-  RefundPilot Settings
-</h1>
+      {/* PAGE HEADER */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">
+          RefundPilot Settings
+        </h1>
 
-      <label className="block mb-2 font-medium">
-        Tax Jurisdiction
-      </label>
-
-      <select
-        value={jurisdiction}
-        onChange={(e) =>
-          setJurisdiction(
-            e.target.value
-          )
-        }
-        className="border p-2 rounded w-full"
-      >
-
-        
-        
-        <option value="US">
-          United States
-        </option>
-
-        <option value="UK">
-          United Kingdom
-        </option>
-
-        <option value="AU">
-          Australia
-        </option>
-
-        <option value="CA">
-          Canada
-        </option>
-      </select>
-
-      <label className="block mt-4 mb-2 font-medium">
-  Business Name
-</label>
-
-<input
-  type="text"
-  value={businessName}
-  onChange={(e) => setBusinessName(e.target.value)}
-  className="border p-2 rounded w-full"
-/>
-
-<label className="block mt-4 mb-2 font-medium">
-  Business Type
-</label>
-
-<select
-  value={businessType}
-  onChange={(e) => setBusinessType(e.target.value)}
-  className="border p-2 rounded w-full"
->
-  <option value="">Select Business Type</option>
-
-  <option value="Accountant">Accountant</option>
-  <option value="Electrician">Electrician</option>
-  <option value="Plumber">Plumber</option>
-  <option value="Contractor">Contractor</option>
-  <option value="Consultant">Consultant</option>
-  <option value="Real Estate">Real Estate</option>
-  <option value="Restaurant">Restaurant</option>
-  <option value="Retail">Retail</option>
-  <option value="Healthcare">Healthcare</option>
-  <option value="Other">Other</option>
-</select>
-
-<label className="block mt-4 mb-2 font-medium">
-  Country
-</label>
-
-<select
-  value={country}
-  onChange={(e)=>setCountry(e.target.value)}
-  className="border p-2 rounded w-full"
->
-  <option value="United States">United States</option>
-  <option value="America/Toronto">Canada</option>
-  <option value="Europe/London">United Kingdom</option>
-  <option value="Australia/Sydney">Australia</option>
-</select>
-
-
-      <button
-        onClick={saveSettings}
-        disabled={loading}
-        className="mt-6 bg-blue-600 text-white px-4 py-2 rounded"
-      >
-        {loading
-          ? "Saving..."
-          : "Save Settings"}
-      </button>
-
-      <div className="mt-6">
-        <button
-          onClick={() =>
-  window.open(
-    `${BASE_URL}/calendar/connect`,
-    "_blank"
-  )
-}
-          className="bg-purple-600 text-white px-4 py-2 rounded"
-        >
-          {calendarConnected
-            ? "Reconnect Calendar"
-            : "Connect Calendar"}
-        </button>
+        <p className="text-gray-500 mt-2">
+          Manage your business profile and connected services.
+        </p>
       </div>
 
-      <div className="mt-8">
-        <h2 className="text-xl font-semibold mb-4">
+      {/* ================================= */}
+      {/* BUSINESS PROFILE */}
+      {/* ================================= */}
+
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 mb-8">
+
+        <h2 className="text-xl font-bold text-gray-800 mb-1">
+          Business Profile
+        </h2>
+
+        <p className="text-sm text-gray-500 mb-6">
+          Help Max understand your business and provide more relevant assistance.
+        </p>
+
+        {/* BUSINESS NAME */}
+        <label className="block mb-2 font-medium text-gray-700">
+          Business Name
+        </label>
+
+        <input
+          type="text"
+          value={businessName}
+          onChange={(e) =>
+            setBusinessName(e.target.value)
+          }
+          placeholder="Enter your business name"
+          className="border border-gray-300 p-3 rounded-lg w-full mb-5 focus:ring-2 focus:ring-blue-500 outline-none"
+        />
+
+        {/* BUSINESS TYPE */}
+        <label className="block mb-2 font-medium text-gray-700">
+          Business Type
+        </label>
+
+        <select
+          value={businessType}
+          onChange={(e) =>
+            setBusinessType(e.target.value)
+          }
+          className="border border-gray-300 p-3 rounded-lg w-full mb-5 focus:ring-2 focus:ring-blue-500 outline-none"
+        >
+          <option value="">
+            Select Business Type
+          </option>
+
+          <option value="Accountant">Accountant</option>
+          <option value="Electrician">Electrician</option>
+          <option value="Plumber">Plumber</option>
+          <option value="Contractor">Contractor</option>
+          <option value="Consultant">Consultant</option>
+          <option value="Real Estate">Real Estate</option>
+          <option value="Restaurant">Restaurant</option>
+          <option value="Retail">Retail</option>
+          <option value="Healthcare">Healthcare</option>
+
+          <option value="Lawyer">Lawyer</option>
+          <option value="Dentist">Dentist</option>
+          <option value="Medical Practice">Medical Practice</option>
+          <option value="Cleaning Company">Cleaning Company</option>
+          <option value="Landscaping">Landscaping</option>
+          <option value="HVAC">HVAC</option>
+          <option value="Construction">Construction</option>
+          <option value="Photographer">Photographer</option>
+          <option value="Freelancer">Freelancer</option>
+
+          <option value="Other">Other</option>
+        </select>
+
+        {/* COUNTRY */}
+        <label className="block mb-2 font-medium text-gray-700">
+          Country
+        </label>
+
+        <select
+          value={country}
+          onChange={(e) =>
+            setCountry(e.target.value)
+          }
+          className="border border-gray-300 p-3 rounded-lg w-full mb-5 focus:ring-2 focus:ring-blue-500 outline-none"
+        >
+          <option value="United States">
+            United States
+          </option>
+
+          <option value="Canada">
+            Canada
+          </option>
+
+          <option value="United Kingdom">
+            United Kingdom
+          </option>
+
+          <option value="Australia">
+            Australia
+          </option>
+        </select>
+
+        {/* TAX JURISDICTION */}
+        <label className="block mb-2 font-medium text-gray-700">
+          Tax Jurisdiction
+        </label>
+
+        <select
+          value={jurisdiction}
+          onChange={(e) =>
+            setJurisdiction(e.target.value)
+          }
+          className="border border-gray-300 p-3 rounded-lg w-full focus:ring-2 focus:ring-blue-500 outline-none"
+        >
+          <option value="US">
+            United States
+          </option>
+
+          <option value="UK">
+            United Kingdom
+          </option>
+
+          <option value="AU">
+            Australia
+          </option>
+
+          <option value="CA">
+            Canada
+          </option>
+        </select>
+
+        <button
+          onClick={saveSettings}
+          disabled={loading}
+          className="mt-6 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition disabled:opacity-50"
+        >
+          {loading
+            ? "Saving..."
+            : "Save Business Profile"}
+        </button>
+
+      </div>
+
+      {/* ================================= */}
+      {/* CONNECTIONS */}
+      {/* ================================= */}
+
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 mb-8">
+
+        <h2 className="text-xl font-bold text-gray-800 mb-1">
+          Connections
+        </h2>
+
+        <p className="text-sm text-gray-500 mb-6">
+          Connect your business services to RefundPilot.
+        </p>
+
+        {/* GMAIL */}
+        <div className="flex items-center justify-between py-4 border-b">
+
+          <div>
+            <h3 className="font-semibold text-gray-800">
+              Gmail
+            </h3>
+
+            <p
+              className={`text-sm ${
+                gmailConnected
+                  ? "text-green-600"
+                  : "text-gray-500"
+              }`}
+            >
+              {gmailConnected
+                ? "✓ Connected"
+                : "Not Connected"}
+            </p>
+          </div>
+
+          <button
+            onClick={() =>
+              window.open(
+                `${BASE_URL}/gmail/connect`,
+                "_blank"
+              )
+            }
+            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg"
+          >
+            {gmailConnected
+              ? "Reconnect"
+              : "Connect Gmail"}
+          </button>
+
+        </div>
+
+        {/* CALENDAR */}
+        <div className="flex items-center justify-between py-4 border-b">
+
+          <div>
+            <h3 className="font-semibold text-gray-800">
+              Google Calendar
+            </h3>
+
+            <p
+              className={`text-sm ${
+                calendarConnected
+                  ? "text-green-600"
+                  : "text-gray-500"
+              }`}
+            >
+              {calendarConnected
+                ? "✓ Connected"
+                : "Not Connected"}
+            </p>
+          </div>
+
+          <button
+            onClick={() =>
+              window.open(
+                `${BASE_URL}/calendar/connect`,
+                "_blank"
+              )
+            }
+            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg"
+          >
+            {calendarConnected
+              ? "Reconnect"
+              : "Connect Calendar"}
+          </button>
+
+        </div>
+
+        {/* XERO */}
+        <div className="flex items-center justify-between py-4">
+
+          <div>
+            <h3 className="font-semibold text-gray-800">
+              Xero
+            </h3>
+
+            <p
+              className={`text-sm ${
+                xeroConnected
+                  ? "text-green-600"
+                  : "text-gray-500"
+              }`}
+            >
+              {xeroConnected
+                ? "✓ Connected"
+                : "Not Connected"}
+            </p>
+          </div>
+
+          <button
+            onClick={() =>
+              window.open(
+                `${BASE_URL}/xero/connect`,
+                "_blank"
+              )
+            }
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+          >
+            {xeroConnected
+              ? "Reconnect"
+              : "Connect Xero"}
+          </button>
+
+        </div>
+
+      </div>
+
+      {/* ================================= */}
+      {/* UPCOMING APPOINTMENTS */}
+      {/* ================================= */}
+
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+
+        <h2 className="text-xl font-bold text-gray-800 mb-1">
           Upcoming Appointments
         </h2>
 
-        {events.length === 0 ? (
+        <p className="text-sm text-gray-500 mb-6">
+          Your upcoming appointments from your connected calendar.
+        </p>
+
+        {!calendarConnected ? (
           <p className="text-gray-500">
-            No upcoming events found.
+            Connect Google Calendar to view upcoming appointments.
+          </p>
+        ) : events.length === 0 ? (
+          <p className="text-gray-500">
+            No upcoming appointments found.
           </p>
         ) : (
           <div className="space-y-3">
             {events.map((event, index) => (
               <div
                 key={index}
-                className="border rounded-lg p-4 bg-gray-50"
+                className="border border-gray-200 rounded-xl p-4 bg-gray-50"
               >
-                <p className="font-semibold">
+                <p className="font-semibold text-gray-800">
                   {event.summary}
                 </p>
 
-                <p className="text-sm text-gray-600">
-  {new Date(event.start).toLocaleString(
-    [],
-    {
-      timeZone:
-        event.timezone ||
-        Intl.DateTimeFormat().resolvedOptions().timeZone
-    }
-  )}
-</p>
+                <p className="text-sm text-gray-600 mt-1">
+                  {new Date(
+                    event.start
+                  ).toLocaleString()}
+                </p>
               </div>
             ))}
           </div>
         )}
+
       </div>
 
     </div>

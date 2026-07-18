@@ -139,7 +139,7 @@ export default function Layout() {
         <div>
           <div className="flex items-center justify-center py-6 border-b border-gray-200">
             <img
-  src="logo.png"
+  src="/logo.png"
   alt="RefundPilot"
   className="h-12 w-12 object-contain"
 />

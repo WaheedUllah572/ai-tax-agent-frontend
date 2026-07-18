@@ -134,12 +134,23 @@ export default function ChatbotPage() {
       <div className="w-full max-w-5xl bg-white/70 backdrop-blur-xl shadow-2xl rounded-3xl border border-gray-200 p-6 flex flex-col relative overflow-hidden">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-3xl font-extrabold flex items-center gap-2">
-            🤖{" "}
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text drop-shadow">
-              Max — Your RefundPilot AI Assistant
-            </span>
-          </h2>
+          <h2 className="flex items-center gap-3">
+  <img
+    src="/logo.png"
+    alt="RefundPilot"
+    className="h-12 w-12 object-contain"
+  />
+
+  <div>
+    <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+      Max
+    </h1>
+
+    <p className="text-gray-500 text-sm">
+      Your RefundPilot AI Assistant
+    </p>
+  </div>
+</h2>
 
           <div className="flex gap-2">
             <button
@@ -201,16 +212,22 @@ export default function ChatbotPage() {
           {history.map((h, idx) => (
             <div key={idx} className="space-y-3">
               <div className="flex justify-end">
-                <div className="px-5 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-3xl shadow-lg max-w-lg text-sm">
+                <div className="px-5 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-3xl shadow-lg max-w-[80%] text-sm">
                   {h.user}
                 </div>
               </div>
 
               <div className="flex justify-start">
                 <div className="px-5 py-3 bg-white/90 border border-gray-200 text-gray-800 rounded-3xl shadow-md max-w-lg text-sm">
-                  {h.bot === "typing..."
-                    ? "..."
-                    : <ReactMarkdown>{h.bot}</ReactMarkdown>}
+                  {h.bot === "typing..." ? (
+  <div className="flex gap-1">
+    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
+    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100"></span>
+    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200"></span>
+  </div>
+) : (
+  <ReactMarkdown>{h.bot}</ReactMarkdown>
+)}
 
                   {/* ✅ Confirmation Buttons */}
                   
@@ -220,14 +237,14 @@ export default function ChatbotPage() {
                         onClick={() => sendMessage("CONFIRM")}
                         className="px-4 py-2 bg-green-600 text-white rounded-full text-xs shadow hover:scale-105 transition"
                       >
-                        Confirm
+                        ✓ Confirm Trip
                       </button>
 
                       <button
                         onClick={() => sendMessage("EDIT")}
                         className="px-4 py-2 bg-blue-600 text-white rounded-full text-xs shadow hover:scale-105 transition"
                       >
-                        Edit
+                        ✏ Edit Details
                       </button>
                     </div>
                   )}
