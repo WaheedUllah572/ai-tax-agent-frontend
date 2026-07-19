@@ -14,7 +14,7 @@ export const AuthProvider = ({ children }) => {
   // -------------------------------
   // REGISTER USER
   // -------------------------------
-  const register = async (name, email, password, role) => {
+  const register = async (name, email, password) => {
     try {
       const res = await fetch(`${API_BASE}/auth/register`, {
         method: "POST",
@@ -23,7 +23,6 @@ export const AuthProvider = ({ children }) => {
   name,
   email,
   password,
-  role,
 }),
       });
 

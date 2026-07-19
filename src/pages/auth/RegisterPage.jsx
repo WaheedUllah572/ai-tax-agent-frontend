@@ -7,7 +7,6 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("owner");
   const [confirmPassword, setConfirmPassword] = useState("");
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -28,8 +27,7 @@ export default function RegisterPage() {
   const result = await register(
   name,
   email,
-  password,
-  role
+  password
 );
 
   if (result?.error) {
@@ -96,21 +94,6 @@ navigate("/login");
               required
             />
           </div>
-
-          <div>
-  <label className="block text-sm font-medium text-gray-700 mb-2">
-    Account Type
-  </label>
-
-  <select
-    value={role}
-    onChange={(e) => setRole(e.target.value)}
-    className="w-full px-4 py-3 border rounded-xl shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition"
-  >
-    <option value="owner">Business Owner</option>
-    <option value="accountant">Accountant</option>
-  </select>
-</div>
 
           <div className="relative">
             <LockClosedIcon className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />

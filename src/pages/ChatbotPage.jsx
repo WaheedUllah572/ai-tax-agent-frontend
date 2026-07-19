@@ -86,7 +86,10 @@ export default function ChatbotPage() {
 );
 
       const reply = res.data.reply || "No reply received.";
-      const pending = res.data.context?.pending_trip_confirmation;
+      const pending =
+  mode === "tax"
+    ? res.data.context?.pending_trip_confirmation
+    : null;
 
       setHistory((prev) => {
         const newHistory = [...prev];
@@ -231,7 +234,7 @@ export default function ChatbotPage() {
 
                   {/* ✅ Confirmation Buttons */}
                   
-                  {h.pendingConfirmation && (
+                  {mode === "tax" && h.pendingConfirmation && (
                     <div className="mt-4 flex gap-3">
                       <button
                         onClick={() => sendMessage("CONFIRM")}
