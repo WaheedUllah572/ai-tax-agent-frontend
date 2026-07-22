@@ -11,6 +11,7 @@ export default function SettingsPage() {
   const [country, setCountry] = useState("United States");
 
   const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
 
   const [gmailConnected, setGmailConnected] = useState(false);
   const [calendarConnected, setCalendarConnected] = useState(false);
@@ -59,8 +60,8 @@ export default function SettingsPage() {
         setCountry(data.country || "United States");
       })
       .catch((err) => {
-        console.error("Settings load error:", err);
-      });
+  console.error("Settings load error:", err);
+})
 
     // ==============================
     // GMAIL STATUS
@@ -151,8 +152,11 @@ export default function SettingsPage() {
           setEvents(data.events || []);
         }
       })
-      .catch((err) => {
+            .catch((err) => {
         console.error("Calendar events error:", err);
+      })
+      .finally(() => {
+        setPageLoading(false);
       });
   }, []);
 
@@ -211,6 +215,20 @@ export default function SettingsPage() {
       setLoading(false);
     }
   };
+
+  if (pageLoading) {
+  return (
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="text-center">
+        <div className="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4"></div>
+
+        <p className="text-gray-600 font-medium">
+          Loading your settings...
+        </p>
+      </div>
+    </div>
+  );
+}
 
   return (
     <div className="max-w-3xl mx-auto py-10">
