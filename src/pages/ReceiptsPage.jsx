@@ -46,7 +46,16 @@ Authorization:`Bearer ${token}`
   };
 
   const fetchReceipts = async () => {
-    const res = await fetch(`${BASE_URL}/receipts/all`);
+    const token = localStorage.getItem("access_token");
+
+const res = await fetch(
+  `${BASE_URL}/receipts/all`,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+);
     const data = await res.json();
 
     const receiptsArray = Array.isArray(data)
@@ -126,13 +135,18 @@ possibleDuplicate:
 
     formData.append("file", file);
 
-    const res = await fetch(
-      `${BASE_URL}/receipts/upload`,
-      {
-        method: "POST",
-        body: formData,
-      }
-    );
+    const token = localStorage.getItem("access_token");
+
+const res = await fetch(
+  `${BASE_URL}/receipts/upload`,
+  {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  }
+);
 
     const data = await res.json();
 
@@ -153,34 +167,48 @@ possibleDuplicate:
 
   const approveReceipt = async (id) => {
 
-  await fetch(
-    `${BASE_URL}/receipts/approve/${id}`,
-    {
-      method: "PUT",
-    }
-  );
+  const token = localStorage.getItem("access_token");
+
+await fetch(
+  `${BASE_URL}/receipts/approve/${id}`,
+  {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+);
 
   fetchReceipts();
 };
 
   const approveDuplicate = async (id) => {
 
-  await fetch(
-    `${BASE_URL}/receipts/approve-duplicate/${id}`,
-    {
-      method: "PUT",
-    }
-  );
+  const token = localStorage.getItem("access_token");
+
+await fetch(
+  `${BASE_URL}/receipts/approve-duplicate/${id}`,
+  {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+);
 
   fetchReceipts();
 };
 
 const markDuplicate = async (id) => {
+  const token = localStorage.getItem("access_token");
 
   await fetch(
     `${BASE_URL}/receipts/mark-duplicate/${id}`,
     {
       method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     }
   );
 
@@ -188,41 +216,48 @@ const markDuplicate = async (id) => {
 };
 
   const deleteReceipt = async (id) => {
-    await fetch(
-      `${BASE_URL}/receipts/${id}`,
-      {
-        method: "DELETE",
-      }
-    );
+  const token = localStorage.getItem("access_token");
 
-    setReceipts((prev) =>
-      prev.filter((r) => r.id !== id)
-    );
-  };
+  await fetch(
+    `${BASE_URL}/receipts/${id}`,
+    {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  setReceipts((prev) =>
+    prev.filter((r) => r.id !== id)
+  );
+};
 
   const saveEdit = async () => {
-    await fetch(
-      `${BASE_URL}/receipts/update/${editingReceipt.id}`,
-      {
-        method: "PUT",
+  if (!editingReceipt) return;
 
-        headers: {
-          "Content-Type": "application/json",
-        },
+  const token = localStorage.getItem("access_token");
 
-        body: JSON.stringify({
-          vendor: editingReceipt.vendor,
-          amount: editingReceipt.rawAmount,
-          category: editingReceipt.category,
-          date: editingReceipt.date,
-        }),
-      }
-    );
+  await fetch(
+    `${BASE_URL}/receipts/update/${editingReceipt.id}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        vendor: editingReceipt.vendor,
+        amount: editingReceipt.rawAmount,
+        category: editingReceipt.category,
+        date: editingReceipt.date,
+      }),
+    }
+  );
 
-    setEditingReceipt(null);
-
-    fetchReceipts();
-  };
+  setEditingReceipt(null);
+  fetchReceipts();
+};
 
   const filteredReceipts = receipts.filter((r) => {
     if (filter === "All") return true;

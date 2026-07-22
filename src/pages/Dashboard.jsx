@@ -70,9 +70,11 @@ const [reviewCount, setReviewCount] =
     try {
 
       const res = await axios.get(
-    `${BASE_URL}/gmail/scan`,
-    authConfig
+  `${BASE_URL}/gmail/scan`,
+  authConfig
 );
+
+setGmailConnected(res.data.connected);
 
 setGmailConnected(res.data.connected);
 
