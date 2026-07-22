@@ -12,94 +12,175 @@ export default function SettingsPage() {
 
   const [loading, setLoading] = useState(false);
 
-  // Connection statuses
   const [gmailConnected, setGmailConnected] = useState(false);
   const [calendarConnected, setCalendarConnected] = useState(false);
   const [xeroConnected, setXeroConnected] = useState(false);
 
   const [events, setEvents] = useState([]);
 
+  // =====================================================
+  // LOAD SETTINGS + CONNECTION STATUS
+  // =====================================================
+
   useEffect(() => {
+    const token = localStorage.getItem("access_token");
+
+    if (!token) {
+      console.error("No access token found.");
+      return;
+    }
+
+    const authHeaders = {
+      Authorization: `Bearer ${token}`,
+    };
+
     // ==============================
-    // LOAD BUSINESS SETTINGS
+    // BUSINESS SETTINGS
     // ==============================
-    fetch(`${BASE_URL}/settings`)
-      .then((res) => res.json())
+
+    fetch(`${BASE_URL}/settings`, {
+      headers: authHeaders,
+    })
+      .then(async (res) => {
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(
+            data.detail || "Failed to load settings"
+          );
+        }
+
+        return data;
+      })
       .then((data) => {
         setJurisdiction(data.jurisdiction || "US");
         setBusinessName(data.business_name || "");
         setBusinessType(data.business_type || "");
         setCountry(data.country || "United States");
       })
-      .catch((err) =>
-        console.error("Settings load error:", err)
-      );
+      .catch((err) => {
+        console.error("Settings load error:", err);
+      });
 
     // ==============================
     // GMAIL STATUS
     // ==============================
-    fetch(`${BASE_URL}/gmail/status`)
-      .then((res) => res.json())
+
+    fetch(`${BASE_URL}/gmail/status`, {
+      headers: authHeaders,
+    })
+      .then(async (res) => {
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(
+            data.detail || "Failed to get Gmail status"
+          );
+        }
+
+        return data;
+      })
       .then((data) => {
         setGmailConnected(data.connected === true);
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error("Gmail status error:", err);
         setGmailConnected(false);
       });
 
     // ==============================
     // CALENDAR STATUS
     // ==============================
-    fetch(`${BASE_URL}/calendar/status`)
-      .then((res) => res.json())
+
+    fetch(`${BASE_URL}/calendar/status`, {
+      headers: authHeaders,
+    })
+      .then(async (res) => {
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(
+            data.detail || "Failed to get Calendar status"
+          );
+        }
+
+        return data;
+      })
       .then((data) => {
         setCalendarConnected(data.connected === true);
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error("Calendar status error:", err);
         setCalendarConnected(false);
       });
 
     // ==============================
     // XERO STATUS
     // ==============================
+
     fetch(`${BASE_URL}/xero/status`)
       .then((res) => res.json())
       .then((data) => {
         setXeroConnected(data.connected === true);
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error("Xero status error:", err);
         setXeroConnected(false);
       });
 
     // ==============================
-    // LOAD UPCOMING EVENTS
+    // CALENDAR EVENTS
     // ==============================
-    fetch(`${BASE_URL}/calendar/events`)
-      .then((res) => res.json())
+
+    fetch(`${BASE_URL}/calendar/events`, {
+      headers: authHeaders,
+    })
+      .then(async (res) => {
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(
+            data.detail || "Failed to load calendar events"
+          );
+        }
+
+        return data;
+      })
       .then((data) => {
         if (data.success) {
           setEvents(data.events || []);
         }
       })
-      .catch((err) =>
-        console.error("Calendar events error:", err)
-      );
+      .catch((err) => {
+        console.error("Calendar events error:", err);
+      });
   }, []);
 
-  // ==============================
+  // =====================================================
   // SAVE SETTINGS
-  // ==============================
+  // =====================================================
+
   const saveSettings = async () => {
     try {
       setLoading(true);
+
+      const token = localStorage.getItem("access_token");
+
+      if (!token) {
+        alert("Your login session was not found. Please login again.");
+        return;
+      }
 
       const response = await fetch(
         `${BASE_URL}/settings`,
         {
           method: "PUT",
+
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
+
           body: JSON.stringify({
             jurisdiction,
             business_name: businessName,
@@ -109,14 +190,23 @@ export default function SettingsPage() {
         }
       );
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error("Could not save settings");
+        console.error("Save settings response:", data);
+
+        throw new Error(
+          data.detail || "Could not save settings"
+        );
       }
 
       alert("Settings saved successfully.");
     } catch (error) {
-      console.error(error);
-      alert("Could not save settings.");
+      console.error("Save settings error:", error);
+
+      alert(
+        error.message || "Could not save settings."
+      );
     } finally {
       setLoading(false);
     }
@@ -126,6 +216,7 @@ export default function SettingsPage() {
     <div className="max-w-3xl mx-auto py-10">
 
       {/* PAGE HEADER */}
+
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">
           RefundPilot Settings
@@ -136,9 +227,7 @@ export default function SettingsPage() {
         </p>
       </div>
 
-      {/* ================================= */}
       {/* BUSINESS PROFILE */}
-      {/* ================================= */}
 
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 mb-8">
 
@@ -150,7 +239,6 @@ export default function SettingsPage() {
           Help Max understand your business and provide more relevant assistance.
         </p>
 
-        {/* BUSINESS NAME */}
         <label className="block mb-2 font-medium text-gray-700">
           Business Name
         </label>
@@ -165,7 +253,6 @@ export default function SettingsPage() {
           className="border border-gray-300 p-3 rounded-lg w-full mb-5 focus:ring-2 focus:ring-blue-500 outline-none"
         />
 
-        {/* BUSINESS TYPE */}
         <label className="block mb-2 font-medium text-gray-700">
           Business Type
         </label>
@@ -177,9 +264,7 @@ export default function SettingsPage() {
           }
           className="border border-gray-300 p-3 rounded-lg w-full mb-5 focus:ring-2 focus:ring-blue-500 outline-none"
         >
-          <option value="">
-            Select Business Type
-          </option>
+          <option value="">Select Business Type</option>
 
           <option value="Accountant">Accountant</option>
           <option value="Electrician">Electrician</option>
@@ -190,7 +275,6 @@ export default function SettingsPage() {
           <option value="Restaurant">Restaurant</option>
           <option value="Retail">Retail</option>
           <option value="Healthcare">Healthcare</option>
-
           <option value="Lawyer">Lawyer</option>
           <option value="Dentist">Dentist</option>
           <option value="Medical Practice">Medical Practice</option>
@@ -200,11 +284,9 @@ export default function SettingsPage() {
           <option value="Construction">Construction</option>
           <option value="Photographer">Photographer</option>
           <option value="Freelancer">Freelancer</option>
-
           <option value="Other">Other</option>
         </select>
 
-        {/* COUNTRY */}
         <label className="block mb-2 font-medium text-gray-700">
           Country
         </label>
@@ -233,7 +315,6 @@ export default function SettingsPage() {
           </option>
         </select>
 
-        {/* TAX JURISDICTION */}
         <label className="block mb-2 font-medium text-gray-700">
           Tax Jurisdiction
         </label>
@@ -274,9 +355,7 @@ export default function SettingsPage() {
 
       </div>
 
-      {/* ================================= */}
       {/* CONNECTIONS */}
-      {/* ================================= */}
 
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 mb-8">
 
@@ -289,6 +368,7 @@ export default function SettingsPage() {
         </p>
 
         {/* GMAIL */}
+
         <div className="flex items-center justify-between py-4 border-b">
 
           <div>
@@ -326,6 +406,7 @@ export default function SettingsPage() {
         </div>
 
         {/* CALENDAR */}
+
         <div className="flex items-center justify-between py-4 border-b">
 
           <div>
@@ -363,6 +444,7 @@ export default function SettingsPage() {
         </div>
 
         {/* XERO */}
+
         <div className="flex items-center justify-between py-4">
 
           <div>
@@ -401,9 +483,7 @@ export default function SettingsPage() {
 
       </div>
 
-      {/* ================================= */}
       {/* UPCOMING APPOINTMENTS */}
-      {/* ================================= */}
 
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
 
