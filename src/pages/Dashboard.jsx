@@ -44,6 +44,14 @@ export default function Dashboard() {
   needs_review_count: 0
 });
 
+const token = localStorage.getItem("access_token");
+
+const authConfig = {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+};
+
 const [reviewCount, setReviewCount] =
   useState(0);
   const [gmailConnected, setGmailConnected] =
@@ -62,12 +70,11 @@ const [reviewCount, setReviewCount] =
     try {
 
       const res = await axios.get(
-        `${BASE_URL}/gmail/status`
-      );
+    `${BASE_URL}/gmail/scan`,
+    authConfig
+);
 
-      setGmailConnected(
-        res.data.connected
-      );
+setGmailConnected(res.data.connected);
 
     } catch (err) {
 
@@ -80,10 +87,15 @@ const [reviewCount, setReviewCount] =
     try {
 
       const res = await axios.get(
-        `${BASE_URL}/reports/analytics`
-      );
+    `${BASE_URL}/reports/analytics`,
+    authConfig
+);
 
-      setAnalytics(res.data);
+setAnalytics(res.data);
+
+setReviewCount(
+    res.data.needs_review_count || 0
+);
       setReviewCount(
   res.data.needs_review_count || 0
 );

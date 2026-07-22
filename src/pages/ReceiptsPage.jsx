@@ -27,6 +27,12 @@ export default function ReceiptsPage() {
       String(amount || "0").replace(/[^\d.]/g, "")
     );
 
+    const token = localStorage.getItem("access_token");
+
+const authHeaders = {
+Authorization:`Bearer ${token}`
+};
+
     const formatted = num.toLocaleString(undefined, {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,

@@ -76,12 +76,19 @@ export default function ChatbotPage() {
     setLoading(true);
 
     try {
-      const res = await axios.post(
+      const token = localStorage.getItem("access_token");
+
+const res = await axios.post(
   "https://ai-tax-agent-backend-1.onrender.com/chat",
   {
     message: messageToSend,
     mode: mode,
     session_id: "user-session-1",
+  },
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   }
 );
 

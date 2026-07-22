@@ -44,7 +44,16 @@ export default function Layout() {
   useEffect(() => {
     const checkStatus = async () => {
       try {
-        const res = await axios.get(`${baseUrl}/xero/status`);
+        const token = localStorage.getItem("access_token");
+
+const res = await axios.get(
+  `${baseUrl}/xero/status`,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+);
         setXeroConnected(res.data?.connected === true);
       } catch {
         setXeroConnected(false);
@@ -62,8 +71,15 @@ export default function Layout() {
   }, [baseUrl]);
 
   const handleLogout = () => {
+
     localStorage.removeItem("user");
+
+    localStorage.removeItem("access_token");
+
+    localStorage.removeItem("refresh_token");
+
     localStorage.removeItem("onboarding_completed");
+
     navigate("/login");
 };
 

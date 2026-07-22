@@ -1,123 +1,188 @@
-import React, { createContext, useContext, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+} from "react";
 
 const AuthContext = createContext();
 
-// ✅ LIVE BACKEND URL
-const API_BASE = "https://ai-tax-agent-backend-1.onrender.com";
+const API_BASE =
+  process.env.REACT_APP_API_BASE_URL ||
+  "https://ai-tax-agent-backend-1.onrender.com";
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(
-    JSON.parse(localStorage.getItem("user"))
-  );
-  const [pendingEmail, setPendingEmail] = useState(null);
-
-  // -------------------------------
-  // REGISTER USER
-  // -------------------------------
-  const register = async (name, email, password) => {
+  const [user, setUser] = useState(() => {
     try {
-      const res = await fetch(`${API_BASE}/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-  name,
-  email,
-  password,
-}),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        return { error: data.detail || "Registration failed" };
-      }
-
-      return { success: true };
-    } catch (err) {
-      return { error: "Server error" };
-    }
-  };
-
-  // -------------------------------
-  // LOGIN — Step 1
-  // -------------------------------
-  const loginStep1 = async (email, password) => {
-    try {
-      const res = await fetch(`${API_BASE}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        return { error: data.detail || "Login failed" };
-      }
-
-      if (data["2fa_required"]) {
-        setPendingEmail(email);
-        return { twoFA: true };
-      }
-
-      if (data["login_success"]) {
-  const userData = {
-    name: data.name,
-    email: data.email,
-    role: data.role,
-  };
-
-  setUser(userData);
-  localStorage.setItem("user", JSON.stringify(userData));
-
-  setPendingEmail(null);
-
-  return {
-    success: true,
-    role: data.role,
-  };
-}
-
-      return { error: true };
+      const storedUser = localStorage.getItem("user");
+      return storedUser ? JSON.parse(storedUser) : null;
     } catch {
-      return { error: "Server error" };
+      return null;
     }
-  };
+  });
 
-  // -------------------------------
-  // VERIFY OTP
-  // -------------------------------
-  const verify2FA = async (code) => {
+  // --------------------------------
+  // REGISTER
+  // --------------------------------
+
+  const register = async (
+    name,
+    email,
+    password
+  ) => {
     try {
-      const res = await fetch(`${API_BASE}/auth/verify-2fa`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: pendingEmail, code }),
-      });
+      const res = await fetch(
+        `${API_BASE}/auth/register`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name,
+            email,
+            password,
+          }),
+        }
+      );
 
       const data = await res.json();
 
       if (!res.ok) {
-        return { error: data.detail || "Invalid code" };
+        return {
+          error:
+            data.detail ||
+            "Registration failed",
+        };
       }
 
-      if (data["login_success"]) {
-        const userData = { email: pendingEmail };
-        setUser(userData);
-        localStorage.setItem("user", JSON.stringify(userData));
-        setPendingEmail(null);
-        return { success: true };
-      }
+      return {
+        success: true,
+      };
 
-      return { error: true };
-    } catch {
-      return { error: "Server error" };
+    } catch (error) {
+      console.error(
+        "Registration error:",
+        error
+      );
+
+      return {
+        error: "Server error",
+      };
     }
   };
+
+  // --------------------------------
+  // LOGIN
+  // --------------------------------
+
+  const loginStep1 = async (
+    email,
+    password
+  ) => {
+    try {
+      const res = await fetch(
+        `${API_BASE}/auth/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            password,
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        return {
+          error:
+            data.detail ||
+            "Login failed",
+        };
+      }
+
+      if (!data.login_success) {
+        return {
+          error: "Login failed",
+        };
+      }
+
+      const userData = {
+        name: data.name,
+        email: data.email,
+        role: data.role,
+      };
+
+      // Store user UI information
+      localStorage.setItem(
+        "user",
+        JSON.stringify(userData)
+      );
+
+      // Store Supabase authentication tokens
+      localStorage.setItem(
+        "access_token",
+        data.access_token
+      );
+
+      localStorage.setItem(
+        "refresh_token",
+        data.refresh_token
+      );
+
+      setUser(userData);
+
+      return {
+        success: true,
+        role: data.role,
+      };
+
+    } catch (error) {
+      console.error(
+        "Login error:",
+        error
+      );
+
+      return {
+        error: "Server error",
+      };
+    }
+  };
+
+  // --------------------------------
+  // GET ACCESS TOKEN
+  // --------------------------------
+
+  const getAccessToken = () => {
+    return localStorage.getItem(
+      "access_token"
+    );
+  };
+
+  // --------------------------------
+  // LOGOUT
+  // --------------------------------
 
   const logout = () => {
     setUser(null);
+
     localStorage.removeItem("user");
+    localStorage.removeItem(
+      "access_token"
+    );
+    localStorage.removeItem(
+      "refresh_token"
+    );
+
+    // Prevent another user on the same
+    // browser inheriting onboarding state.
+    localStorage.removeItem(
+      "onboarding_completed"
+    );
   };
 
   return (
@@ -126,8 +191,8 @@ export const AuthProvider = ({ children }) => {
         user,
         register,
         loginStep1,
-        verify2FA,
         logout,
+        getAccessToken,
       }}
     >
       {children}
@@ -135,4 +200,5 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () =>
+  useContext(AuthContext);

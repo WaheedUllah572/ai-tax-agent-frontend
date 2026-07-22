@@ -3,6 +3,13 @@ import axios from "axios";
 import { PlusIcon, TrashIcon, ChartBarIcon, MapIcon } from "@heroicons/react/24/solid";
 
 export default function MileagePage() {
+  const token = localStorage.getItem("access_token");
+
+const authConfig = {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+};
   const [trips, setTrips] = useState([]);
   const [form, setForm] = useState({
     date: "",
@@ -16,7 +23,10 @@ export default function MileagePage() {
 
   // ✅ LOAD TRIPS FROM BACKEND
   useEffect(() => {
-    axios.get("https://ai-tax-agent-backend-1.onrender.com/mileage/history")
+    axios.get(
+  "https://ai-tax-agent-backend-1.onrender.com/mileage/history",
+  authConfig
+)
       .then(res => {
         const formattedTrips = res.data.map(t => ({
   id: t.trip_id,
@@ -48,9 +58,16 @@ status: t.status || "Completed"
 
     try {
       setLoadingMiles(true);
-      const res = await axios.get("https://ai-tax-agent-backend-1.onrender.com/calculate-miles", {
-        params: { start: form.start, destination: form.destination },
-      });
+      const res = await axios.get(
+    "https://ai-tax-agent-backend-1.onrender.com/calculate-miles",
+    {
+        params:{
+            start:form.start,
+            destination:form.destination
+        },
+        ...authConfig
+    }
+);
 
       if (res.data.error) {
         alert("❌ " + res.data.error);

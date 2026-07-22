@@ -22,7 +22,11 @@ export default function ReportsPage() {
     process.env.REACT_APP_API_BASE_URL?.trim() ||
     "https://ai-tax-agent-backend-1.onrender.com";
 
-  fetch(`${BASE_URL}/reports/analytics`)
+  fetch(`${BASE_URL}/reports/analytics`, {
+    headers:{
+        Authorization:`Bearer ${localStorage.getItem("access_token")}`
+    }
+})
   .then((res) => res.json())
   .then((data) =>
     setSummary({
@@ -60,13 +64,7 @@ export default function ReportsPage() {
   doc.save("RefundPilot_Report.pdf");
 };
 
-  const downloadCSV = () => {
-  const BASE_URL =
-    process.env.REACT_APP_API_BASE_URL?.trim() ||
-    "https://ai-tax-agent-backend-1.onrender.com";
-
-  window.open(`${BASE_URL}/reports/tax-report`, "_blank");
-};
+  downloadCSV()
 
   const emailReport = () => {
     const subject = encodeURIComponent("Your Expense Summary");

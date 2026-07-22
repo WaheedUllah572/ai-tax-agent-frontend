@@ -22,8 +22,9 @@ export default function OnboardingPage() {
     {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
-      },
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+},
       body: JSON.stringify({
         business_name: businessName,
         business_type: businessType,
@@ -35,15 +36,22 @@ export default function OnboardingPage() {
 
     const data = await res.json();
 
-    if (data.success) {
-      alert("Business profile setup complete");
-      localStorage.setItem(
-  "onboarding_completed",
-  true
-);
-      window.location.href = "/dashboard";
-    }
-  };
+if (!res.ok) {
+  console.error("Onboarding error:", data);
+  alert(data.detail || "Failed to complete setup");
+  return;
+}
+
+if (data.success) {
+  alert("Business profile setup complete");
+
+  localStorage.setItem(
+    "onboarding_completed",
+    "true"
+  );
+
+  window.location.href = "/dashboard";
+}
 
   return (
     <div className="max-w-2xl mx-auto mt-10 bg-white p-8 rounded-xl shadow-lg">
@@ -169,4 +177,5 @@ export default function OnboardingPage() {
       </button>
     </div>
   );
+}
 }
