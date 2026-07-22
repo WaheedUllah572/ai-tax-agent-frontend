@@ -53,7 +53,9 @@ if (data.success) {
   window.location.href = "/dashboard";
 }
 
-  return (
+}  
+
+return (
     <div className="max-w-2xl mx-auto mt-10 bg-white p-8 rounded-xl shadow-lg">
       <p className="text-gray-500 mb-6">
   Complete your business profile and connect your services to start using TaxMate AI.
@@ -177,5 +179,4 @@ if (data.success) {
       </button>
     </div>
   );
-}
 }
