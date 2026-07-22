@@ -8,6 +8,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
 
@@ -24,11 +25,15 @@ export default function RegisterPage() {
     return;
   }
 
-  const result = await register(
+  setLoading(true);
+
+const result = await register(
   name,
   email,
   password
 );
+
+setLoading(false);
 
   if (result?.error) {
     alert(result.error);
@@ -120,10 +125,11 @@ navigate("/login");
           </div>
 
           <button
-            type="submit"
+  type="submit"
+  disabled={loading}
             className="w-full bg-gradient-to-r from-green-500 to-blue-500 text-white py-3 rounded-xl font-semibold shadow-md hover:shadow-lg transition transform hover:-translate-y-0.5"
           >
-            Create Account
+            {loading ? "Creating Account..." : "Create Account"}
           </button>
         </form>
 

@@ -9,6 +9,7 @@ export default function OnboardingPage() {
   const [businessType, setBusinessType] = useState("");
   const [timezone, setTimezone] = useState("Asia/Karachi");
   const [accountCount, setAccountCount] = useState(1);
+  const [country, setCountry] = useState("United States");
 
   const handleSubmit = async () => {
 
@@ -26,11 +27,12 @@ export default function OnboardingPage() {
   Authorization: `Bearer ${localStorage.getItem("access_token")}`,
 },
       body: JSON.stringify({
-        business_name: businessName,
-        business_type: businessType,
-        timezone,
-        account_count: accountCount
-      })
+  business_name: businessName,
+  business_type: businessType,
+  country: country,
+  timezone,
+  account_count: accountCount
+})
     }
   );
 
@@ -79,15 +81,47 @@ return (
   Business Type
 </label>
 
-      <input
-        type="text"
-        placeholder="e.g. Accounting Firm"
-        value={businessType}
-        onChange={(e) =>
-          setBusinessType(e.target.value)
-        }
-        className="border p-2 rounded w-full mb-4"
-      />
+      <select
+  value={businessType}
+  onChange={(e) => setBusinessType(e.target.value)}
+  className="border p-2 rounded w-full mb-4"
+>
+  <option value="">Select Business Type</option>
+  <option value="Accountant">Accountant</option>
+  <option value="Electrician">Electrician</option>
+  <option value="Plumber">Plumber</option>
+  <option value="Contractor">Contractor</option>
+  <option value="Consultant">Consultant</option>
+  <option value="Real Estate">Real Estate</option>
+  <option value="Restaurant">Restaurant</option>
+  <option value="Retail">Retail</option>
+  <option value="Healthcare">Healthcare</option>
+  <option value="Lawyer">Lawyer</option>
+  <option value="Dentist">Dentist</option>
+  <option value="Medical Practice">Medical Practice</option>
+  <option value="Cleaning Company">Cleaning Company</option>
+  <option value="Landscaping">Landscaping</option>
+  <option value="HVAC">HVAC</option>
+  <option value="Construction">Construction</option>
+  <option value="Photographer">Photographer</option>
+  <option value="Freelancer">Freelancer</option>
+  <option value="Other">Other</option>
+</select>
+
+<label className="block mb-2 font-medium">
+  Country
+</label>
+
+<select
+  value={country}
+  onChange={(e) => setCountry(e.target.value)}
+  className="border p-2 rounded w-full mb-4"
+>
+  <option value="United States">United States</option>
+  <option value="Canada">Canada</option>
+  <option value="United Kingdom">United Kingdom</option>
+  <option value="Australia">Australia</option>
+</select>
 
       <label className="block mb-2 font-medium">
   Timezone
