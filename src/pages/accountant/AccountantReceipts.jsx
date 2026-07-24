@@ -6,6 +6,13 @@ const BASE_URL =
 
 export default function AccountantReceipts() {
   const [receipts, setReceipts] = useState([]);
+  const getAuthHeaders = () => {
+  const token = localStorage.getItem("access_token");
+
+  return {
+    Authorization: `Bearer ${token}`,
+  };
+};
 
   const [editingReceipt, setEditingReceipt] = useState(null);
   const [previewReceipt, setPreviewReceipt] = useState(null);
@@ -19,10 +26,31 @@ export default function AccountantReceipts() {
   const [accountantNote, setAccountantNote] = useState("");
 
   useEffect(() => {
-    fetch(`${BASE_URL}/accountant/dashboard`)
-      .then((res) => res.json())
-      .then((data) => setReceipts(data.receipts || []));
-  }, []);
+  const loadReceipts = async () => {
+    try {
+      const token = localStorage.getItem("access_token");
+
+      const res = await fetch(`${BASE_URL}/receipts/all`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        console.error("Failed to load receipts:", res.status);
+        return;
+      }
+
+      const data = await res.json();
+
+      setReceipts(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Receipt loading error:", error);
+    }
+  };
+
+  loadReceipts();
+}, []);
 
   // ====================================
   // APPROVE
@@ -30,8 +58,9 @@ export default function AccountantReceipts() {
 
   const approveReceipt = async (id) => {
     await fetch(`${BASE_URL}/receipts/approve/${id}`, {
-      method: "PUT",
-    });
+  method: "PUT",
+  headers: getAuthHeaders(),
+});
 
     setReceipts((prev) =>
       prev.map((r) =>
@@ -51,8 +80,9 @@ export default function AccountantReceipts() {
 
   const rejectReceipt = async (id) => {
     await fetch(`${BASE_URL}/receipts/reject/${id}`, {
-      method: "PUT",
-    });
+  method: "PUT",
+  headers: getAuthHeaders(),
+});
 
     setReceipts((prev) =>
       prev.map((r) =>
@@ -76,8 +106,9 @@ export default function AccountantReceipts() {
       {
         method: "PUT",
         headers: {
-          "Content-Type": "application/json",
-        },
+  "Content-Type": "application/json",
+  ...getAuthHeaders(),
+},
         body: JSON.stringify({
           vendor: editVendor,
           amount: editAmount,
