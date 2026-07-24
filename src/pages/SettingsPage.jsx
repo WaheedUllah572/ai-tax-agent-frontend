@@ -54,14 +54,17 @@ export default function SettingsPage() {
         return data;
       })
       .then((data) => {
-        setJurisdiction(data.jurisdiction || "US");
-        setBusinessName(data.business_name || "");
-        setBusinessType(data.business_type || "");
-        setCountry(data.country || "United States");
-      })
-      .catch((err) => {
+  setJurisdiction(data.jurisdiction || "US");
+  setBusinessName(data.business_name || "");
+  setBusinessType(data.business_type || "");
+  setCountry(data.country || "United States");
+})
+.catch((err) => {
   console.error("Settings load error:", err);
 })
+.finally(() => {
+  setPageLoading(false);
+});
 
     // ==============================
     // GMAIL STATUS
@@ -153,16 +156,14 @@ export default function SettingsPage() {
         }
       })
             .catch((err) => {
-        console.error("Calendar events error:", err);
-      })
-      .finally(() => {
-        setPageLoading(false);
-      });
-  }, []);
+  console.error("Calendar events error:", err);
+});
 
-  // =====================================================
-  // SAVE SETTINGS
-  // =====================================================
+}, []);
+
+// =====================================================
+// SAVE SETTINGS
+// =====================================================
 
   const saveSettings = async () => {
     try {

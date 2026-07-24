@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { CloudArrowUpIcon, CameraIcon } from "@heroicons/react/24/outline";
-
+import { useAuth } from "../context/AuthContext";
 export default function ReceiptsPage() {
+  const { refreshAccessToken } = useAuth();
   const [receipts, setReceipts] = useState([]);
   const [cameraMode, setCameraMode] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -16,6 +17,41 @@ export default function ReceiptsPage() {
   const galleryInputRef = useRef(null);
 
   const BASE_URL = "https://ai-tax-agent-backend-1.onrender.com";
+  const authenticatedFetch = async (url, options = {}) => {
+  let token = localStorage.getItem("access_token");
+
+  let response = await fetch(url, {
+    ...options,
+    headers: {
+      ...(options.headers || {}),
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  // Access token expired → refresh it and retry once
+  if (response.status === 401) {
+    token = await refreshAccessToken();
+
+    if (!token) {
+      localStorage.removeItem("user");
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+
+      window.location.href = "/login";
+      return response;
+    }
+
+    response = await fetch(url, {
+  ...options,
+  headers: {
+    ...(options.headers || {}),
+    Authorization: `Bearer ${token}`,
+  },
+});
+}
+
+return response;
+};
 
   useEffect(() => {
     fetchReceipts();
@@ -135,15 +171,10 @@ possibleDuplicate:
 
     formData.append("file", file);
 
-    const token = localStorage.getItem("access_token");
-
-const res = await fetch(
+    const res = await authenticatedFetch(
   `${BASE_URL}/receipts/upload`,
   {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
     body: formData,
   }
 );
