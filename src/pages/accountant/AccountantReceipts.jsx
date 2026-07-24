@@ -16,6 +16,7 @@ export default function AccountantReceipts() {
 
   const [editingReceipt, setEditingReceipt] = useState(null);
   const [previewReceipt, setPreviewReceipt] = useState(null);
+  const [previewImageUrl, setPreviewImageUrl] = useState(null);
 
   const [editVendor, setEditVendor] = useState("");
   const [editAmount, setEditAmount] = useState("");
@@ -141,18 +142,25 @@ export default function AccountantReceipts() {
   // ====================================
 
   const saveNote = async () => {
-    await fetch(
+  try {
+    const res = await fetch(
       `${BASE_URL}/receipts/notes/${noteReceipt.id}`,
       {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          ...getAuthHeaders(),
         },
         body: JSON.stringify({
           note: accountantNote,
         }),
       }
     );
+
+    if (!res.ok) {
+      console.error("Failed to save note:", res.status);
+      return;
+    }
 
     setReceipts((prev) =>
       prev.map((r) =>
@@ -167,7 +175,40 @@ export default function AccountantReceipts() {
 
     setNoteReceipt(null);
     setAccountantNote("");
-  };
+  } catch (error) {
+    console.error("Save note error:", error);
+  }
+};
+
+const viewReceipt = async (receipt) => {
+  try {
+    const res = await fetch(
+      `${BASE_URL}/receipts/image/${receipt.filename}`,
+      {
+        headers: getAuthHeaders(),
+      }
+    );
+
+    if (!res.ok) {
+      console.error(
+        "Failed to load receipt image:",
+        res.status
+      );
+      return;
+    }
+
+    const blob = await res.blob();
+    const imageUrl = URL.createObjectURL(blob);
+
+    setPreviewReceipt(receipt);
+    setPreviewImageUrl(imageUrl);
+  } catch (error) {
+    console.error(
+      "Receipt preview error:",
+      error
+    );
+  }
+};
 
   return (
     <div className="p-8">
@@ -246,7 +287,7 @@ export default function AccountantReceipts() {
 
 
                 <button
-  onClick={() => setPreviewReceipt(receipt)}
+  onClick={() => viewReceipt(receipt)}
   className="bg-gray-700 hover:bg-gray-800 text-white px-3 py-1 rounded"
 >
   View
@@ -426,7 +467,7 @@ Receipt Preview
 </h2>
 
 <img
-    src={`${BASE_URL}/receipts/image/${previewReceipt.filename}`}
+    src={previewImageUrl}
     alt="Receipt"
     className="max-h-[700px] rounded shadow"
 />
@@ -434,7 +475,14 @@ Receipt Preview
 <div className="flex justify-end mt-6">
 
 <button
-    onClick={() => setPreviewReceipt(null)}
+    onClick={() => {
+  if (previewImageUrl) {
+    URL.revokeObjectURL(previewImageUrl);
+  }
+
+  setPreviewReceipt(null);
+  setPreviewImageUrl(null);
+}}
     className="bg-indigo-600 text-white px-5 py-2 rounded"
 >
 Close
