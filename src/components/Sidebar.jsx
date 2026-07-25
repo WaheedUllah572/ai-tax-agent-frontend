@@ -54,9 +54,6 @@ export default function Sidebar() {
     };
 
     checkStatus();
-    const interval = setInterval(checkStatus, 20000);
-
-    return () => clearInterval(interval);
   }, []);
 
   return (
