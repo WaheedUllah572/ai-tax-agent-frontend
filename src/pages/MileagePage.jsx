@@ -36,6 +36,10 @@ export default function MileagePage() {
   const [loadingMiles, setLoadingMiles] = useState(false);
   const [savingTrip, setSavingTrip] = useState(false);
   const [reminderLoading, setReminderLoading] = useState(null);
+  const [activeTrip, setActiveTrip] = useState(null);
+const [activeTripLoading, setActiveTripLoading] = useState(true);
+const [stoppingMileage, setStoppingMileage] = useState(false);
+const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
   // =====================================================
   // LOAD TRIPS
@@ -106,10 +110,67 @@ export default function MileagePage() {
     }
   }, [token]);
 
+  const loadActiveTrip = useCallback(async () => {
+  try {
+    setActiveTripLoading(true);
+
+    const res = await axios.get(
+      `${BASE_URL}/mileage/active`,
+      authConfig
+    );
+
+    if (res.data?.active) {
+      setActiveTrip(res.data);
+
+      if (res.data.start_time) {
+        const started = new Date(res.data.start_time).getTime();
+        const now = Date.now();
+
+        setElapsedSeconds(
+          Math.max(0, Math.floor((now - started) / 1000))
+        );
+      }
+    } else {
+      setActiveTrip(null);
+      setElapsedSeconds(0);
+    }
+  } catch (error) {
+    console.error("Active mileage error:", error);
+    setActiveTrip(null);
+  } finally {
+    setActiveTripLoading(false);
+  }
+}, [token]);
+
   useEffect(() => {
-    loadTrips();
-    loadReminders();
-  }, [loadTrips, loadReminders]);
+  loadTrips();
+  loadReminders();
+  loadActiveTrip();
+}, [loadTrips, loadReminders, loadActiveTrip]);
+
+// =====================================================
+// ACTIVE TRIP LIVE TIMER
+// =====================================================
+
+useEffect(() => {
+  if (!activeTrip) return;
+
+  const timer = setInterval(() => {
+    setElapsedSeconds((previous) => previous + 1);
+  }, 1000);
+
+  return () => clearInterval(timer);
+}, [activeTrip]);
+
+const formatElapsedTime = (seconds) => {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+
+  return [hours, minutes, secs]
+    .map((value) => String(value).padStart(2, "0"))
+    .join(":");
+};
 
   // =====================================================
   // FORM
@@ -325,6 +386,53 @@ export default function MileagePage() {
   };
 
   // =====================================================
+// STOP ACTIVE MILEAGE
+// =====================================================
+
+const stopMileage = async () => {
+  const confirmed = window.confirm(
+    "Stop mileage tracking and save this trip?"
+  );
+
+  if (!confirmed) return;
+
+  try {
+    setStoppingMileage(true);
+
+    const res = await axios.post(
+      `${BASE_URL}/mileage/stop`,
+      {},
+      authConfig
+    );
+
+    if (res.data?.error) {
+      alert(res.data.error);
+      return;
+    }
+
+    setActiveTrip(null);
+    setElapsedSeconds(0);
+
+    await loadTrips();
+    await loadReminders();
+
+    alert("Mileage trip completed and saved successfully.");
+  } catch (error) {
+    console.error(
+      "Stop mileage error:",
+      error
+    );
+
+    alert(
+      error.response?.data?.detail ||
+        "Unable to stop mileage tracking."
+    );
+  } finally {
+    setStoppingMileage(false);
+  }
+};
+
+  // =====================================================
   // ANALYTICS
   // =====================================================
 
@@ -362,6 +470,148 @@ export default function MileagePage() {
           Log, organize, and analyze your business trips.
         </p>
       </div>
+
+      {/* ============================================= */}
+{/* ACTIVE MILEAGE TRACKING */}
+{/* ============================================= */}
+
+{activeTripLoading ? (
+  <div className="bg-white rounded-2xl shadow-md border p-5 mb-8">
+    <p className="text-gray-500">
+      Checking mileage tracking status...
+    </p>
+  </div>
+) : activeTrip ? (
+  <div className="mb-8 rounded-3xl border-2 border-green-200 bg-gradient-to-r from-green-50 via-white to-emerald-50 shadow-lg overflow-hidden">
+
+    <div className="p-6">
+
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+
+        {/* TRIP INFORMATION */}
+
+        <div>
+
+          <div className="flex items-center gap-3 mb-3">
+
+            <div className="relative flex h-4 w-4">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-4 w-4 bg-green-500"></span>
+            </div>
+
+            <span className="text-sm font-bold uppercase tracking-wide text-green-700">
+              Mileage Tracking Active
+            </span>
+
+          </div>
+
+          <h3 className="text-2xl font-bold text-gray-900">
+            {activeTrip.purpose || "Business Trip"}
+          </h3>
+
+          {activeTrip.start_location && (
+            <p className="text-gray-600 mt-3">
+              Start:{" "}
+              <strong>
+                {activeTrip.start_location}
+              </strong>
+            </p>
+          )}
+
+          {activeTrip.destination && (
+            <p className="text-gray-600 mt-1">
+              Destination:{" "}
+              <strong>
+                {activeTrip.destination}
+              </strong>
+            </p>
+          )}
+
+          {activeTrip.client_name && (
+            <p className="text-gray-600 mt-1">
+              Client:{" "}
+              <strong>
+                {activeTrip.client_name}
+              </strong>
+            </p>
+          )}
+
+          {activeTrip.meeting_with && (
+            <p className="text-gray-600 mt-1">
+              Meeting with:{" "}
+              <strong>
+                {activeTrip.meeting_with}
+              </strong>
+            </p>
+          )}
+
+          {activeTrip.start_time && (
+            <p className="text-sm text-gray-500 mt-3">
+              Started:{" "}
+              {new Date(
+                activeTrip.start_time
+              ).toLocaleTimeString()}
+            </p>
+          )}
+
+        </div>
+
+        {/* TIMER + STOP BUTTON */}
+
+        <div className="flex flex-col sm:flex-row items-center gap-5">
+
+          <div className="text-center bg-white px-7 py-4 rounded-2xl border shadow-sm">
+
+            <p className="text-xs uppercase tracking-wide text-gray-500 font-semibold">
+              Trip Duration
+            </p>
+
+            <p className="text-3xl font-bold text-green-600 mt-1 font-mono">
+              {formatElapsedTime(elapsedSeconds)}
+            </p>
+
+          </div>
+
+          <button
+            onClick={stopMileage}
+            disabled={stoppingMileage}
+            className="bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white px-7 py-4 rounded-xl font-bold shadow-md transition"
+          >
+            {stoppingMileage
+              ? "Stopping..."
+              : "■ Stop Mileage"}
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+) : (
+  <div className="mb-8 bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+
+    <div className="flex items-center gap-3">
+
+      <div className="h-3 w-3 rounded-full bg-gray-300"></div>
+
+      <div>
+
+        <p className="font-semibold text-gray-700">
+          Mileage Tracking
+        </p>
+
+        <p className="text-sm text-gray-500">
+          No business trip is currently being tracked.
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+)}
 
       {/* ============================================= */}
       {/* RETURN TRIP REMINDERS */}
