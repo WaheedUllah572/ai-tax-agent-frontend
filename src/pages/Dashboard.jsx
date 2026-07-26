@@ -60,29 +60,110 @@ const [reviewCount, setReviewCount] =
   const [scanning, setScanning] =
     useState(false);
 
+const [mileageReminders, setMileageReminders] = useState([]);
+const [startingMileage, setStartingMileage] = useState(false);
+const [dismissedEvents, setDismissedEvents] = useState([]);
+
   useEffect(() => {
-    fetchAnalytics();
-    checkGmailStatus();
-  }, []);
+  fetchAnalytics();
+  checkGmailStatus();
+  checkMileageReminders();
+}, []);
 
   const checkGmailStatus = async () => {
+  try {
+    const res = await axios.get(
+      `${BASE_URL}/gmail/status`,
+      authConfig
+    );
 
-    try {
+    setGmailConnected(
+      res.data?.connected === true
+    );
+  } catch (err) {
+    console.error(
+      "Gmail status error:",
+      err
+    );
 
-      const res = await axios.get(
-  `${BASE_URL}/gmail/scan`,
-  authConfig
-);
+    setGmailConnected(false);
+  }
+};
 
-setGmailConnected(res.data.connected);
+const checkMileageReminders = async () => {
+  try {
+    const res = await axios.get(
+      `${BASE_URL}/calendar/mileage-reminders`,
+      authConfig
+    );
 
-setGmailConnected(res.data.connected);
+    setMileageReminders(
+      res.data?.reminders || []
+    );
+  } catch (err) {
+    console.error(
+      "Mileage reminder error:",
+      err
+    );
+  }
+};
 
-    } catch (err) {
 
-      console.error(err);
+const startMileageFromMeeting = async (event) => {
+  try {
+    setStartingMileage(true);
+
+    const res = await axios.post(
+      `${BASE_URL}/mileage/start`,
+      {
+        destination: event.location || null,
+        end_location: event.location || null,
+        purpose:
+          event.title || "Business meeting",
+        meeting_with:
+          event.title || null,
+        calendar_event_id:
+          event.event_id,
+      },
+      authConfig
+    );
+
+    if (res.data?.error) {
+      alert(res.data.error);
+      return;
     }
-  };
+
+    setDismissedEvents((previous) => [
+      ...previous,
+      event.event_id,
+    ]);
+
+    alert(
+      "Mileage tracking started for this meeting."
+    );
+
+  } catch (err) {
+    console.error(
+      "Start mileage error:",
+      err
+    );
+
+    alert(
+      "Unable to start mileage tracking."
+    );
+
+  } finally {
+    setStartingMileage(false);
+  }
+};
+
+
+const dismissMileageReminder = (eventId) => {
+  setDismissedEvents((previous) => [
+    ...previous,
+    eventId,
+  ]);
+};
 
   const fetchAnalytics = async () => {
 
@@ -97,9 +178,6 @@ setAnalytics(res.data);
 
 setReviewCount(
     res.data.needs_review_count || 0
-);
-      setReviewCount(
-  res.data.needs_review_count || 0
 );
 
     } catch (err) {
@@ -121,8 +199,9 @@ setReviewCount(
       setScanning(true);
 
       const res = await axios.get(
-        `${BASE_URL}/gmail/scan`
-      );
+  `${BASE_URL}/gmail/scan`,
+  authConfig
+);
 
       alert(
         `Imported ${res.data.imported} receipts from Gmail`
@@ -188,6 +267,84 @@ setReviewCount(
       <h1 className="text-5xl font-extrabold text-center mb-12 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
         RefundPilot Business Dashboard
       </h1>
+
+      {/* CALENDAR MILEAGE REMINDERS */}
+
+{mileageReminders
+  .filter(
+    (event) =>
+      !dismissedEvents.includes(
+        event.event_id
+      )
+  )
+  .map((event) => (
+
+    <div
+      key={event.event_id}
+      className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 p-6 rounded-3xl shadow-lg mb-6"
+    >
+
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+
+        <div>
+
+          <h2 className="text-xl font-bold text-gray-800 mb-2">
+            🚗 Upcoming Meeting — Mileage Reminder
+          </h2>
+
+          <p className="text-gray-700">
+            <strong>{event.title}</strong>{" "}
+            starts in approximately{" "}
+            <strong>
+              {event.minutes_until} minutes
+            </strong>.
+          </p>
+
+          {event.location && (
+            <p className="text-gray-600 mt-1">
+              Location: {event.location}
+            </p>
+          )}
+
+          <p className="text-gray-600 mt-2">
+            If you're driving to this meeting,
+            remember to start mileage tracking.
+          </p>
+
+        </div>
+
+        <div className="flex gap-3">
+
+          <button
+            onClick={() =>
+              startMileageFromMeeting(event)
+            }
+            disabled={startingMileage}
+            className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white px-5 py-3 rounded-xl font-semibold shadow transition"
+          >
+            {startingMileage
+              ? "Starting..."
+              : "Start Mileage"}
+          </button>
+
+          <button
+            onClick={() =>
+              dismissMileageReminder(
+                event.event_id
+              )
+            }
+            className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-5 py-3 rounded-xl font-semibold transition"
+          >
+            Dismiss
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  ))}
 
       {/* GMAIL SECTION */}
       <div className="bg-white p-6 rounded-3xl shadow-xl mb-10">
