@@ -62,7 +62,22 @@ const [reviewCount, setReviewCount] =
 
 const [mileageReminders, setMileageReminders] = useState([]);
 const [startingMileage, setStartingMileage] = useState(false);
-const [dismissedEvents, setDismissedEvents] = useState([]);
+const [dismissedEvents, setDismissedEvents] = useState(() => {
+  try {
+    return JSON.parse(
+      localStorage.getItem("dismissedMileageEvents") || "[]"
+    );
+  } catch {
+    return [];
+  }
+});
+
+useEffect(() => {
+  localStorage.setItem(
+    "dismissedMileageEvents",
+    JSON.stringify(dismissedEvents)
+  );
+}, [dismissedEvents]);
 
   useEffect(() => {
   fetchAnalytics();
