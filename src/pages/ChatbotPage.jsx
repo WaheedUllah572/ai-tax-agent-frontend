@@ -17,6 +17,7 @@ export default function ChatbotPage() {
   const [micEnabled, setMicEnabled] = useState(true);
   const chatEndRef = useRef(null);
   const recognitionRef = useRef(null);
+  const sendMessageRef = useRef(null);
 
   // 🔊 REMOVE EMOJIS + MARKDOWN BEFORE SPEECH
   const cleanForSpeech = (text) => {
@@ -44,9 +45,14 @@ export default function ChatbotPage() {
     recognition.onend = () => setListening(false);
 
     recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript;
-      setInput(transcript);
-    };
+  const transcript = event.results[0][0].transcript.trim();
+
+  setInput(transcript);
+
+  if (transcript && sendMessageRef.current) {
+    sendMessageRef.current(transcript);
+  }
+};
 
     recognitionRef.current = recognition;
   }, []);
@@ -128,6 +134,8 @@ const res = await axios.post(
       setLoading(false);
     }
   };
+
+  sendMessageRef.current = sendMessage;
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !loading) sendMessage();
