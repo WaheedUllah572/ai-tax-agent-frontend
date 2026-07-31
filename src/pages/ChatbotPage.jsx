@@ -16,7 +16,8 @@ export default function ChatbotPage() {
   const [listening, setListening] = useState(false);
   const [micEnabled, setMicEnabled] = useState(true);
   const chatEndRef = useRef(null);
-  const recognitionRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
   const sendMessageRef = useRef(null);
 
   // 🔊 REMOVE EMOJIS + MARKDOWN BEFORE SPEECH
@@ -27,39 +28,6 @@ export default function ChatbotPage() {
       .replace(/`/g, "")
       .replace(/•/g, "")
       .replace(/\n/g, ". ");
-  };
-
-  // 🎤 Speech Recognition
-  useEffect(() => {
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
-
-    if (!SpeechRecognition) return;
-
-    const recognition = new SpeechRecognition();
-    recognition.lang = "en-US";
-    recognition.interimResults = true;
-    recognition.continuous = false;
-    recognition.maxAlternatives = 3;
-
-    recognition.onstart = () => setListening(true);
-    recognition.onend = () => setListening(false);
-
-    recognition.onresult = (event) => {
-  const transcript = event.results[0][0].transcript.trim();
-
-  setInput(transcript);
-
-  // DON'T auto-send yet
-  // sendMessageRef.current(transcript);
-};
-
-    recognitionRef.current = recognition;
-  }, []);
-
-  const toggleMic = () => {
-    if (!recognitionRef.current) return;
-    listening ? recognitionRef.current.stop() : recognitionRef.current.start();
   };
 
   // 🚀 Send Message
@@ -136,6 +104,71 @@ const res = await axios.post(
   };
 
   sendMessageRef.current = sendMessage;
+
+  const toggleMic = async () => {
+  if (!listening) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+      });
+
+      const recorder = new MediaRecorder(stream);
+
+      mediaRecorderRef.current = recorder;
+      audioChunksRef.current = [];
+
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      recorder.onstart = () => {
+        setListening(true);
+      };
+
+      recorder.onstop = async () => {
+        setListening(false);
+
+        const audioBlob = new Blob(audioChunksRef.current, {
+          type: "audio/webm",
+        });
+
+        const formData = new FormData();
+        formData.append("audio", audioBlob, "voice.webm");
+
+        try {
+          const token = localStorage.getItem("access_token");
+
+          const res = await axios.post(
+            "https://ai-tax-agent-backend-1.onrender.com/transcribe",
+            formData,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "multipart/form-data",
+              },
+            }
+          );
+
+          setInput(res.data.text || "");
+        } catch (err) {
+          console.error(err);
+          alert("Speech transcription failed.");
+        }
+
+        stream.getTracks().forEach((track) => track.stop());
+      };
+
+      recorder.start();
+    } catch (err) {
+      console.error(err);
+      alert("Unable to access microphone.");
+    }
+  } else {
+    mediaRecorderRef.current?.stop();
+  }
+};
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !loading) sendMessage();
