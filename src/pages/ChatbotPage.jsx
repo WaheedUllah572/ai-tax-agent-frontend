@@ -38,8 +38,9 @@ export default function ChatbotPage() {
 
     const recognition = new SpeechRecognition();
     recognition.lang = "en-US";
-    recognition.interimResults = false;
+    recognition.interimResults = true;
     recognition.continuous = false;
+    recognition.maxAlternatives = 3;
 
     recognition.onstart = () => setListening(true);
     recognition.onend = () => setListening(false);
@@ -47,11 +48,13 @@ export default function ChatbotPage() {
     recognition.onresult = (event) => {
   const transcript = event.results[0][0].transcript.trim();
 
+  console.log("Speech recognized:", transcript);
+  alert(transcript);
+
   setInput(transcript);
 
-  if (transcript && sendMessageRef.current) {
-    sendMessageRef.current(transcript);
-  }
+  // DON'T auto-send yet
+  // sendMessageRef.current(transcript);
 };
 
     recognitionRef.current = recognition;
