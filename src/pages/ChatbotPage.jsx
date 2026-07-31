@@ -48,9 +48,6 @@ export default function ChatbotPage() {
     recognition.onresult = (event) => {
   const transcript = event.results[0][0].transcript.trim();
 
-  console.log("Speech recognized:", transcript);
-  alert(transcript);
-
   setInput(transcript);
 
   // DON'T auto-send yet
