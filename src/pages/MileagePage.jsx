@@ -75,8 +75,10 @@ const [elapsedSeconds, setElapsedSeconds] = useState(0);
           t.deductible_amount ?? 0,
         method:
           t.method || "AI Tracking",
-        status:
-          t.status || "Completed",
+        status: t.status || "Completed",
+
+returnTripLogged:
+    t.return_trip_logged ?? false,
       }));
 
       setTrips(formattedTrips);
@@ -359,6 +361,48 @@ const formatElapsedTime = (seconds) => {
   // =====================================================
   // DELETE TRIP
   // =====================================================
+
+  const editMileage = async (trip) => {
+
+  const value = window.prompt(
+    "Edit mileage",
+    trip.miles
+  );
+
+  if (value === null) return;
+
+  if (Number(value) <= 0) {
+    alert("Please enter a valid mileage.");
+    return;
+  }
+
+  try {
+
+    await axios.put(
+
+      `${BASE_URL}/mileage/edit/${trip.id}`,
+
+      {
+        miles: Number(value)
+      },
+
+      authConfig
+
+    );
+
+    await loadTrips();
+
+    alert("Mileage updated successfully.");
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert("Unable to update mileage.");
+
+  }
+
+};
 
   const deleteTrip = async (id) => {
     const confirmed = window.confirm(
@@ -966,24 +1010,43 @@ const stopMileage = async () => {
 
                     <td className="px-6 py-3">
 
-                      <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs">
-                        {trip.status}
-                      </span>
+{trip.returnTripLogged ? (
 
-                    </td>
+    <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">
+        ✅ Complete
+    </span>
+
+) : (
+
+    <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-semibold">
+        🔴 Return Trip Pending
+    </span>
+
+)}
+
+</td>
 
                     <td className="px-6 py-3 text-center">
 
-                      <button
-                        onClick={() =>
-                          deleteTrip(trip.id)
-                        }
-                        className="text-red-500 hover:text-red-700"
-                      >
+                      <div className="flex justify-center gap-4">
 
-                        <TrashIcon className="h-5 w-5" />
+  <button
+    onClick={() => editMileage(trip)}
+    className="text-blue-600 hover:text-blue-800 font-semibold"
+    title="Edit Mileage"
+  >
+    ✏️
+  </button>
 
-                      </button>
+  <button
+    onClick={() => deleteTrip(trip.id)}
+    className="text-red-500 hover:text-red-700"
+    title="Delete Trip"
+  >
+    <TrashIcon className="h-5 w-5" />
+  </button>
+
+</div>
 
                     </td>
 
