@@ -8,9 +8,9 @@ export default function AccountantMileage() {
   const [mileage, setMileage] = useState([]);
 
   useEffect(() => {
-    fetch(`${BASE_URL}/accountant/dashboard`)
-      .then(res => res.json())
-      .then(data => setMileage(data.mileage || []));
+    fetch(`${BASE_URL}/mileage/history`)
+  .then((res) => res.json())
+  .then((data) => setMileage(data || []));
   }, []);
 
   return (
@@ -25,6 +25,7 @@ export default function AccountantMileage() {
             <th className="p-3 text-left">Date</th>
             <th className="p-3 text-left">Distance</th>
             <th className="p-3 text-left">Purpose</th>
+<th className="p-3 text-left">Status</th>
           </tr>
         </thead>
 
@@ -32,8 +33,25 @@ export default function AccountantMileage() {
           {mileage.map((m, index) => (
             <tr key={index} className="border-b">
               <td className="p-3">{m.date}</td>
-              <td className="p-3">{m.distance}</td>
-              <td className="p-3">{m.purpose}</td>
+              <td className="p-3">
+  {m.total_miles ?? m.distance_miles}
+</td>
+
+<td className="p-3">
+  {m.business_purpose ?? m.purpose}
+</td>
+
+<td className="p-3">
+  {m.return_trip_logged ? (
+    <span className="text-green-600 font-semibold">
+      Complete
+    </span>
+  ) : (
+    <span className="text-red-600 font-semibold">
+      Return Pending
+    </span>
+  )}
+</td>
             </tr>
           ))}
         </tbody>
