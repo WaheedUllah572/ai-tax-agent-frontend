@@ -10,6 +10,16 @@ export default function SettingsPage() {
   const [businessType, setBusinessType] = useState("");
   const [country, setCountry] = useState("United States");
 
+  // =====================================
+// MULTI BUSINESS
+// =====================================
+
+const [businesses, setBusinesses] = useState([]);
+const [defaultBusiness, setDefaultBusiness] = useState(null);
+
+const [newBusinessName, setNewBusinessName] = useState("");
+const [newBusinessType, setNewBusinessType] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
 
@@ -54,10 +64,19 @@ export default function SettingsPage() {
         return data;
       })
       .then((data) => {
+
   setJurisdiction(data.jurisdiction || "US");
   setBusinessName(data.business_name || "");
   setBusinessType(data.business_type || "");
   setCountry(data.country || "United States");
+
+  // =============================
+  // MULTI BUSINESS
+  // =============================
+
+  setBusinesses(data.businesses || []);
+  setDefaultBusiness(data.default_business || null);
+
 })
 .catch((err) => {
   console.error("Settings load error:", err);
@@ -162,6 +181,62 @@ export default function SettingsPage() {
 }, []);
 
 // =====================================================
+// MULTI BUSINESS
+// =====================================================
+
+const addBusiness = () => {
+
+  if (!newBusinessName.trim()) {
+    alert("Please enter a business name.");
+    return;
+  }
+
+  const business = {
+    id: Date.now(),
+    name: newBusinessName,
+    type: newBusinessType || "Other",
+  };
+
+  const updatedBusinesses = [...businesses, business];
+
+  setBusinesses(updatedBusinesses);
+
+  if (!defaultBusiness) {
+    setDefaultBusiness(business.id);
+  }
+
+  setNewBusinessName("");
+  setNewBusinessType("");
+
+};
+
+const deleteBusiness = (id) => {
+
+  const updated = businesses.filter(
+    (b) => b.id !== id
+  );
+
+  setBusinesses(updated);
+
+  if (defaultBusiness === id) {
+
+    if (updated.length > 0) {
+      setDefaultBusiness(updated[0].id);
+    } else {
+      setDefaultBusiness(null);
+    }
+
+  }
+
+};
+
+const makeDefaultBusiness = (id) => {
+
+  setDefaultBusiness(id);
+
+};
+
+// =====================================================
 // SAVE SETTINGS
 // =====================================================
 
@@ -187,11 +262,16 @@ export default function SettingsPage() {
           },
 
           body: JSON.stringify({
-            jurisdiction,
-            business_name: businessName,
-            business_type: businessType,
-            country,
-          }),
+
+    jurisdiction,
+    business_name: businessName,
+    business_type: businessType,
+    country,
+
+    businesses,
+    default_business: defaultBusiness,
+
+}),
         }
       );
 
@@ -373,6 +453,123 @@ export default function SettingsPage() {
         </button>
 
       </div>
+
+      {/* ===================================== */}
+{/* MULTI BUSINESS */}
+{/* ===================================== */}
+
+<div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 mb-8">
+
+  <h2 className="text-xl font-bold text-gray-800 mb-2">
+    Businesses
+  </h2>
+
+  <p className="text-sm text-gray-500 mb-6">
+    Manage multiple businesses and choose a default business.
+  </p>
+
+  {/* Existing Businesses */}
+
+  <div className="space-y-3 mb-6">
+
+    {businesses.map((business) => (
+
+      <div
+        key={business.id}
+        className="border rounded-xl p-4 flex justify-between items-center"
+      >
+
+        <div>
+
+          <h3 className="font-semibold text-gray-800">
+            {business.name}
+
+            {defaultBusiness === business.id && (
+              <span className="ml-2 text-yellow-500">
+                ⭐ Default
+              </span>
+            )}
+
+          </h3>
+
+          <p className="text-sm text-gray-500">
+            {business.type}
+          </p>
+
+        </div>
+
+        <div className="flex gap-2">
+
+          {defaultBusiness !== business.id && (
+
+            <button
+              onClick={() =>
+                makeDefaultBusiness(business.id)
+              }
+              className="px-3 py-2 bg-indigo-600 text-white rounded-lg text-sm"
+            >
+              Make Default
+            </button>
+
+          )}
+
+          <button
+            onClick={() =>
+              deleteBusiness(business.id)
+            }
+            className="px-3 py-2 bg-red-600 text-white rounded-lg text-sm"
+          >
+            Delete
+          </button>
+
+        </div>
+
+      </div>
+
+    ))}
+
+  </div>
+
+  {/* Add Business */}
+
+  <div className="grid md:grid-cols-3 gap-4">
+
+    <input
+      type="text"
+      placeholder="Business Name"
+      value={newBusinessName}
+      onChange={(e) =>
+        setNewBusinessName(e.target.value)
+      }
+      className="border rounded-lg p-3"
+    />
+
+    <select
+      value={newBusinessType}
+      onChange={(e) =>
+        setNewBusinessType(e.target.value)
+      }
+      className="border rounded-lg p-3"
+    >
+      <option value="">Business Type</option>
+      <option>Plumber</option>
+      <option>Electrician</option>
+      <option>Restaurant</option>
+      <option>Construction</option>
+      <option>Consultant</option>
+      <option>Other</option>
+    </select>
+
+    <button
+      onClick={addBusiness}
+      className="bg-green-600 hover:bg-green-700 text-white rounded-lg px-4 py-3"
+    >
+      + Add Business
+    </button>
+
+  </div>
+
+</div>
 
       {/* CONNECTIONS */}
 
