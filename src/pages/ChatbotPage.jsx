@@ -130,12 +130,27 @@ const res = await axios.post(
       recorder.onstop = async () => {
         setListening(false);
 
-        const audioBlob = new Blob(audioChunksRef.current, {
-          type: "audio/webm",
-        });
+        const mimeType =
+  mediaRecorderRef.current?.mimeType ||
+  audioChunksRef.current[0]?.type ||
+  "audio/webm";
 
-        const formData = new FormData();
-        formData.append("audio", audioBlob, "voice.webm");
+const extension = mimeType.includes("mp4")
+  ? "mp4"
+  : mimeType.includes("mpeg")
+  ? "mp3"
+  : mimeType.includes("ogg")
+  ? "ogg"
+  : mimeType.includes("wav")
+  ? "wav"
+  : "webm";
+
+const audioBlob = new Blob(audioChunksRef.current, {
+  type: mimeType,
+});
+
+const formData = new FormData();
+formData.append("audio", audioBlob, `voice.${extension}`);
 
         try {
           const token = localStorage.getItem("access_token");
