@@ -37,9 +37,42 @@ export default function MileagePage() {
   const [savingTrip, setSavingTrip] = useState(false);
   const [reminderLoading, setReminderLoading] = useState(null);
   const [activeTrip, setActiveTrip] = useState(null);
-const [activeTripLoading, setActiveTripLoading] = useState(true);
-const [stoppingMileage, setStoppingMileage] = useState(false);
-const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [activeTripLoading, setActiveTripLoading] = useState(true);
+  const [stoppingMileage, setStoppingMileage] = useState(false);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+
+  // =====================================================
+  // SAFE LOCATION FORMATTER
+  // =====================================================
+
+  const formatLocation = (location) => {
+    if (!location) return "—";
+
+    if (typeof location === "string") {
+      return location;
+    }
+
+    if (typeof location === "object") {
+      if (location.address) {
+        return String(location.address);
+      }
+
+      if (location.name) {
+        return String(location.name);
+      }
+
+      if (
+        location.latitude !== undefined &&
+        location.longitude !== undefined
+      ) {
+        return `${Number(location.latitude).toFixed(5)}, ${Number(
+          location.longitude
+        ).toFixed(5)}`;
+      }
+    }
+
+    return "—";
+  };
 
   // =====================================================
   // LOAD TRIPS
@@ -52,34 +85,35 @@ const [elapsedSeconds, setElapsedSeconds] = useState(0);
         authConfig
       );
 
-      const formattedTrips = res.data.map((t) => ({
-        id: t.trip_id,
-        date: t.date,
-        start: t.start_location || "—",
-        destination:
-          t.destination ||
-          t.end_location ||
-          "—",
-        client: t.client_name || "—",
-        purpose:
-          t.business_purpose ||
-          t.purpose ||
-          "Business",
-        miles:
-          t.total_miles ??
-          t.distance_miles ??
-          0,
-        duration:
-          t.duration_minutes ?? 0,
-        deduction:
-          t.deductible_amount ?? 0,
-        method:
-          t.method || "AI Tracking",
-        status: t.status || "Completed",
-
-returnTripLogged:
-    t.return_trip_logged ?? false,
-      }));
+      const formattedTrips = Array.isArray(res.data)
+        ? res.data.map((t) => ({
+            id: t.trip_id,
+            date: t.date,
+            start: formatLocation(t.start_location),
+            destination: formatLocation(
+              t.destination || t.end_location
+            ),
+            client: t.client_name || "—",
+            purpose:
+              t.business_purpose ||
+              t.purpose ||
+              "Business",
+            miles:
+              t.total_miles ??
+              t.distance_miles ??
+              0,
+            duration:
+              t.duration_minutes ?? 0,
+            deduction:
+              t.deductible_amount ?? 0,
+            method:
+              t.method || "AI Tracking",
+            status:
+              t.status || "Completed",
+            returnTripLogged:
+              t.return_trip_logged ?? false,
+          }))
+        : [];
 
       setTrips(formattedTrips);
     } catch (error) {
@@ -87,6 +121,8 @@ returnTripLogged:
         "Error loading mileage trips:",
         error
       );
+
+      setTrips([]);
     }
   }, [token]);
 
@@ -102,77 +138,114 @@ returnTripLogged:
       );
 
       setReminders(
-        res.data?.reminders || []
+        Array.isArray(res.data?.reminders)
+          ? res.data.reminders
+          : []
       );
     } catch (error) {
       console.error(
         "Error loading mileage reminders:",
         error
       );
+
+      setReminders([]);
     }
   }, [token]);
 
+  // =====================================================
+  // LOAD ACTIVE TRIP
+  // =====================================================
+
   const loadActiveTrip = useCallback(async () => {
-  try {
-    setActiveTripLoading(true);
+    try {
+      setActiveTripLoading(true);
 
-    const res = await axios.get(
-      `${BASE_URL}/mileage/active`,
-      authConfig
-    );
+      const res = await axios.get(
+        `${BASE_URL}/mileage/active`,
+        authConfig
+      );
 
-    if (res.data?.active) {
-      setActiveTrip(res.data);
+      if (res.data?.active) {
+        setActiveTrip(res.data);
 
-      if (res.data.start_time) {
-        const started = new Date(res.data.start_time).getTime();
-        const now = Date.now();
+        if (res.data.start_time) {
+          const started = new Date(
+            res.data.start_time
+          ).getTime();
 
-        setElapsedSeconds(
-          Math.max(0, Math.floor((now - started) / 1000))
-        );
+          const now = Date.now();
+
+          setElapsedSeconds(
+            Math.max(
+              0,
+              Math.floor((now - started) / 1000)
+            )
+          );
+        }
+      } else {
+        setActiveTrip(null);
+        setElapsedSeconds(0);
       }
-    } else {
+    } catch (error) {
+      console.error(
+        "Active mileage error:",
+        error
+      );
+
       setActiveTrip(null);
       setElapsedSeconds(0);
+    } finally {
+      setActiveTripLoading(false);
     }
-  } catch (error) {
-    console.error("Active mileage error:", error);
-    setActiveTrip(null);
-  } finally {
-    setActiveTripLoading(false);
-  }
-}, [token]);
+  }, [token]);
+
+  // =====================================================
+  // INITIAL LOAD
+  // =====================================================
 
   useEffect(() => {
-  loadTrips();
-  loadReminders();
-  loadActiveTrip();
-}, [loadTrips, loadReminders, loadActiveTrip]);
+    loadTrips();
+    loadReminders();
+    loadActiveTrip();
+  }, [
+    loadTrips,
+    loadReminders,
+    loadActiveTrip,
+  ]);
 
-// =====================================================
-// ACTIVE TRIP LIVE TIMER
-// =====================================================
+  // =====================================================
+  // ACTIVE TRIP LIVE TIMER
+  // =====================================================
 
-useEffect(() => {
-  if (!activeTrip) return;
+  useEffect(() => {
+    if (!activeTrip) return;
 
-  const timer = setInterval(() => {
-    setElapsedSeconds((previous) => previous + 1);
-  }, 1000);
+    const timer = setInterval(() => {
+      setElapsedSeconds(
+        (previous) => previous + 1
+      );
+    }, 1000);
 
-  return () => clearInterval(timer);
-}, [activeTrip]);
+    return () => clearInterval(timer);
+  }, [activeTrip]);
 
-const formatElapsedTime = (seconds) => {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const secs = seconds % 60;
+  const formatElapsedTime = (seconds) => {
+    const hours = Math.floor(
+      seconds / 3600
+    );
 
-  return [hours, minutes, secs]
-    .map((value) => String(value).padStart(2, "0"))
-    .join(":");
-};
+    const minutes = Math.floor(
+      (seconds % 3600) / 60
+    );
+
+    const secs = seconds % 60;
+
+    return [hours, minutes, secs]
+      .map((value) =>
+        String(value).padStart(2, "0")
+      )
+      .join(":");
+  };
 
   // =====================================================
   // FORM
@@ -190,7 +263,10 @@ const formatElapsedTime = (seconds) => {
   // =====================================================
 
   const calculateMiles = async () => {
-    if (!form.start || !form.destination) {
+    if (
+      !form.start ||
+      !form.destination
+    ) {
       alert(
         "Please enter both Start Location and Destination."
       );
@@ -205,7 +281,8 @@ const formatElapsedTime = (seconds) => {
         {
           params: {
             start: form.start,
-            destination: form.destination,
+            destination:
+              form.destination,
           },
           ...authConfig,
         }
@@ -224,7 +301,10 @@ const formatElapsedTime = (seconds) => {
           "Calculated",
       }));
     } catch (error) {
-      console.error(error);
+      console.error(
+        "Calculate mileage error:",
+        error
+      );
 
       alert(
         "Unable to calculate mileage."
@@ -281,7 +361,9 @@ const formatElapsedTime = (seconds) => {
       await loadTrips();
       await loadReminders();
 
-      alert("Trip saved successfully.");
+      alert(
+        "Trip saved successfully."
+      );
     } catch (error) {
       console.error(
         "Error saving trip:",
@@ -359,50 +441,53 @@ const formatElapsedTime = (seconds) => {
   };
 
   // =====================================================
-  // DELETE TRIP
+  // EDIT MILEAGE
   // =====================================================
 
   const editMileage = async (trip) => {
-
-  const value = window.prompt(
-    "Edit mileage",
-    trip.miles
-  );
-
-  if (value === null) return;
-
-  if (Number(value) <= 0) {
-    alert("Please enter a valid mileage.");
-    return;
-  }
-
-  try {
-
-    await axios.put(
-
-      `${BASE_URL}/mileage/edit/${trip.id}`,
-
-      {
-        miles: Number(value)
-      },
-
-      authConfig
-
+    const value = window.prompt(
+      "Edit mileage",
+      trip.miles
     );
 
-    await loadTrips();
+    if (value === null) return;
 
-    alert("Mileage updated successfully.");
+    if (Number(value) <= 0) {
+      alert(
+        "Please enter a valid mileage."
+      );
+      return;
+    }
 
-  } catch (error) {
+    try {
+      await axios.put(
+        `${BASE_URL}/mileage/edit/${trip.id}`,
+        {
+          miles: Number(value),
+        },
+        authConfig
+      );
 
-    console.error(error);
+      await loadTrips();
 
-    alert("Unable to update mileage.");
+      alert(
+        "Mileage updated successfully."
+      );
+    } catch (error) {
+      console.error(
+        "Edit mileage error:",
+        error
+      );
 
-  }
+      alert(
+        "Unable to update mileage."
+      );
+    }
+  };
 
-};
+  // =====================================================
+  // DELETE TRIP
+  // =====================================================
 
   const deleteTrip = async (id) => {
     const confirmed = window.confirm(
@@ -425,56 +510,60 @@ const formatElapsedTime = (seconds) => {
         error
       );
 
-      alert("Unable to delete trip.");
+      alert(
+        "Unable to delete trip."
+      );
     }
   };
 
   // =====================================================
-// STOP ACTIVE MILEAGE
-// =====================================================
+  // STOP ACTIVE MILEAGE
+  // =====================================================
 
-const stopMileage = async () => {
-  const confirmed = window.confirm(
-    "Stop mileage tracking and save this trip?"
-  );
-
-  if (!confirmed) return;
-
-  try {
-    setStoppingMileage(true);
-
-    const res = await axios.post(
-      `${BASE_URL}/mileage/stop`,
-      {},
-      authConfig
+  const stopMileage = async () => {
+    const confirmed = window.confirm(
+      "Stop mileage tracking and save this trip?"
     );
 
-    if (res.data?.error) {
-      alert(res.data.error);
-      return;
+    if (!confirmed) return;
+
+    try {
+      setStoppingMileage(true);
+
+      const res = await axios.post(
+        `${BASE_URL}/mileage/stop`,
+        {},
+        authConfig
+      );
+
+      if (res.data?.error) {
+        alert(res.data.error);
+        return;
+      }
+
+      setActiveTrip(null);
+      setElapsedSeconds(0);
+
+      await loadTrips();
+      await loadReminders();
+
+      alert(
+        "Mileage trip completed and saved successfully."
+      );
+    } catch (error) {
+      console.error(
+        "Stop mileage error:",
+        error
+      );
+
+      alert(
+        error.response?.data?.detail ||
+          "Unable to stop mileage tracking."
+      );
+    } finally {
+      setStoppingMileage(false);
     }
-
-    setActiveTrip(null);
-    setElapsedSeconds(0);
-
-    await loadTrips();
-    await loadReminders();
-
-    alert("Mileage trip completed and saved successfully.");
-  } catch (error) {
-    console.error(
-      "Stop mileage error:",
-      error
-    );
-
-    alert(
-      error.response?.data?.detail ||
-        "Unable to stop mileage tracking."
-    );
-  } finally {
-    setStoppingMileage(false);
-  }
-};
+  };
 
   // =====================================================
   // ANALYTICS
@@ -492,6 +581,10 @@ const stopMileage = async () => {
       (Number(trip.deduction) || 0),
     0
   );
+
+  // =====================================================
+  // RENDER
+  // =====================================================
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-8 rounded-2xl shadow-lg">
@@ -513,155 +606,174 @@ const stopMileage = async () => {
         <p className="text-gray-600 mt-3 text-lg">
           Log, organize, and analyze your business trips.
         </p>
+
       </div>
 
       {/* ============================================= */}
-{/* ACTIVE MILEAGE TRACKING */}
-{/* ============================================= */}
+      {/* ACTIVE MILEAGE TRACKING */}
+      {/* ============================================= */}
 
-{activeTripLoading ? (
-  <div className="bg-white rounded-2xl shadow-md border p-5 mb-8">
-    <p className="text-gray-500">
-      Checking mileage tracking status...
-    </p>
-  </div>
-) : activeTrip ? (
-  <div className="mb-8 rounded-3xl border-2 border-green-200 bg-gradient-to-r from-green-50 via-white to-emerald-50 shadow-lg overflow-hidden">
+      {activeTripLoading ? (
 
-    <div className="p-6">
+        <div className="bg-white rounded-2xl shadow-md border p-5 mb-8">
+          <p className="text-gray-500">
+            Checking mileage tracking status...
+          </p>
+        </div>
 
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+      ) : activeTrip ? (
 
-        {/* TRIP INFORMATION */}
+        <div className="mb-8 rounded-3xl border-2 border-green-200 bg-gradient-to-r from-green-50 via-white to-emerald-50 shadow-lg overflow-hidden">
 
-        <div>
+          <div className="p-6">
 
-          <div className="flex items-center gap-3 mb-3">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
 
-            <div className="relative flex h-4 w-4">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-4 w-4 bg-green-500"></span>
+              {/* TRIP INFORMATION */}
+
+              <div>
+
+                <div className="flex items-center gap-3 mb-3">
+
+                  <div className="relative flex h-4 w-4">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+
+                    <span className="relative inline-flex rounded-full h-4 w-4 bg-green-500"></span>
+                  </div>
+
+                  <span className="text-sm font-bold uppercase tracking-wide text-green-700">
+                    Mileage Tracking Active
+                  </span>
+
+                </div>
+
+                <h3 className="text-2xl font-bold text-gray-900">
+                  {activeTrip.purpose ||
+                    "Business Trip"}
+                </h3>
+
+                {activeTrip.start_location && (
+                  <p className="text-gray-600 mt-3">
+                    Start:{" "}
+                    <strong>
+                      {formatLocation(
+                        activeTrip.start_location
+                      )}
+                    </strong>
+                  </p>
+                )}
+
+                {activeTrip.destination && (
+                  <p className="text-gray-600 mt-1">
+                    Destination:{" "}
+                    <strong>
+                      {formatLocation(
+                        activeTrip.destination
+                      )}
+                    </strong>
+                  </p>
+                )}
+
+                {activeTrip.client_name && (
+                  <p className="text-gray-600 mt-1">
+                    Client:{" "}
+                    <strong>
+                      {String(
+                        activeTrip.client_name
+                      )}
+                    </strong>
+                  </p>
+                )}
+
+                {activeTrip.meeting_with && (
+                  <p className="text-gray-600 mt-1">
+                    Meeting with:{" "}
+                    <strong>
+                      {String(
+                        activeTrip.meeting_with
+                      )}
+                    </strong>
+                  </p>
+                )}
+
+                {activeTrip.start_time && (
+                  <p className="text-sm text-gray-500 mt-3">
+                    Started:{" "}
+                    {new Date(
+                      activeTrip.start_time
+                    ).toLocaleTimeString()}
+                  </p>
+                )}
+
+              </div>
+
+              {/* TIMER + STOP BUTTON */}
+
+              <div className="flex flex-col sm:flex-row items-center gap-5">
+
+                <div className="text-center bg-white px-7 py-4 rounded-2xl border shadow-sm">
+
+                  <p className="text-xs uppercase tracking-wide text-gray-500 font-semibold">
+                    Trip Duration
+                  </p>
+
+                  <p className="text-3xl font-bold text-green-600 mt-1 font-mono">
+                    {formatElapsedTime(
+                      elapsedSeconds
+                    )}
+                  </p>
+
+                </div>
+
+                <button
+                  onClick={stopMileage}
+                  disabled={stoppingMileage}
+                  className="bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white px-7 py-4 rounded-xl font-bold shadow-md transition"
+                >
+                  {stoppingMileage
+                    ? "Stopping..."
+                    : "■ Stop Mileage"}
+                </button>
+
+              </div>
+
             </div>
 
-            <span className="text-sm font-bold uppercase tracking-wide text-green-700">
-              Mileage Tracking Active
-            </span>
-
           </div>
-
-          <h3 className="text-2xl font-bold text-gray-900">
-            {activeTrip.purpose || "Business Trip"}
-          </h3>
-
-          {activeTrip.start_location && (
-            <p className="text-gray-600 mt-3">
-              Start:{" "}
-              <strong>
-                {activeTrip.start_location}
-              </strong>
-            </p>
-          )}
-
-          {activeTrip.destination && (
-            <p className="text-gray-600 mt-1">
-              Destination:{" "}
-              <strong>
-                {activeTrip.destination}
-              </strong>
-            </p>
-          )}
-
-          {activeTrip.client_name && (
-            <p className="text-gray-600 mt-1">
-              Client:{" "}
-              <strong>
-                {activeTrip.client_name}
-              </strong>
-            </p>
-          )}
-
-          {activeTrip.meeting_with && (
-            <p className="text-gray-600 mt-1">
-              Meeting with:{" "}
-              <strong>
-                {activeTrip.meeting_with}
-              </strong>
-            </p>
-          )}
-
-          {activeTrip.start_time && (
-            <p className="text-sm text-gray-500 mt-3">
-              Started:{" "}
-              {new Date(
-                activeTrip.start_time
-              ).toLocaleTimeString()}
-            </p>
-          )}
 
         </div>
 
-        {/* TIMER + STOP BUTTON */}
+      ) : (
 
-        <div className="flex flex-col sm:flex-row items-center gap-5">
+        <div className="mb-8 bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
 
-          <div className="text-center bg-white px-7 py-4 rounded-2xl border shadow-sm">
+          <div className="flex items-center gap-3">
 
-            <p className="text-xs uppercase tracking-wide text-gray-500 font-semibold">
-              Trip Duration
-            </p>
+            <div className="h-3 w-3 rounded-full bg-gray-300"></div>
 
-            <p className="text-3xl font-bold text-green-600 mt-1 font-mono">
-              {formatElapsedTime(elapsedSeconds)}
-            </p>
+            <div>
+
+              <p className="font-semibold text-gray-700">
+                Mileage Tracking
+              </p>
+
+              <p className="text-sm text-gray-500">
+                No business trip is currently being tracked.
+              </p>
+
+            </div>
 
           </div>
 
-          <button
-            onClick={stopMileage}
-            disabled={stoppingMileage}
-            className="bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white px-7 py-4 rounded-xl font-bold shadow-md transition"
-          >
-            {stoppingMileage
-              ? "Stopping..."
-              : "■ Stop Mileage"}
-          </button>
-
         </div>
-
-      </div>
-
-    </div>
-
-  </div>
-) : (
-  <div className="mb-8 bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
-
-    <div className="flex items-center gap-3">
-
-      <div className="h-3 w-3 rounded-full bg-gray-300"></div>
-
-      <div>
-
-        <p className="font-semibold text-gray-700">
-          Mileage Tracking
-        </p>
-
-        <p className="text-sm text-gray-500">
-          No business trip is currently being tracked.
-        </p>
-
-      </div>
-
-    </div>
-
-  </div>
-)}
+      )}
 
       {/* ============================================= */}
       {/* RETURN TRIP REMINDERS */}
       {/* ============================================= */}
 
       {reminders.length > 0 && (
+
         <div className="mb-8 space-y-4">
 
           {reminders.map((reminder) => (
@@ -686,14 +798,23 @@ const stopMileage = async () => {
                   </div>
 
                   <p className="text-gray-700">
+
                     You logged a business trip from{" "}
+
                     <strong>
-                      {reminder.start_location || "your starting location"}
-                    </strong>{" "}
-                    to{" "}
+                      {formatLocation(
+                        reminder.start_location
+                      )}
+                    </strong>
+
+                    {" "}to{" "}
+
                     <strong>
-                      {reminder.destination || "your destination"}
+                      {formatLocation(
+                        reminder.destination
+                      )}
                     </strong>.
+
                   </p>
 
                   <p className="text-gray-600 mt-1">
@@ -702,7 +823,10 @@ const stopMileage = async () => {
 
                   <p className="text-sm text-gray-500 mt-2">
                     Original trip:{" "}
-                    {Number(reminder.miles || 0).toFixed(2)} miles
+                    {Number(
+                      reminder.miles || 0
+                    ).toFixed(2)}{" "}
+                    miles
                   </p>
 
                 </div>
@@ -860,6 +984,7 @@ const stopMileage = async () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
 
         <div className="bg-white p-6 rounded-2xl shadow-md border">
+
           <h4 className="text-gray-500 text-sm">
             Total Trips
           </h4>
@@ -867,9 +992,11 @@ const stopMileage = async () => {
           <p className="text-2xl font-bold text-blue-600">
             {trips.length}
           </p>
+
         </div>
 
         <div className="bg-white p-6 rounded-2xl shadow-md border">
+
           <h4 className="text-gray-500 text-sm">
             Total Miles
           </h4>
@@ -877,6 +1004,7 @@ const stopMileage = async () => {
           <p className="text-2xl font-bold text-purple-600">
             {totalMiles.toFixed(2)}
           </p>
+
         </div>
 
         <div className="bg-white p-6 rounded-2xl shadow-md border">
@@ -980,11 +1108,15 @@ const stopMileage = async () => {
                     </td>
 
                     <td className="px-6 py-3">
-                      {trip.client}
+                      {String(
+                        trip.client
+                      )}
                     </td>
 
                     <td className="px-6 py-3">
-                      {trip.purpose}
+                      {String(
+                        trip.purpose
+                      )}
                     </td>
 
                     <td className="px-6 py-3">
@@ -1010,43 +1142,47 @@ const stopMileage = async () => {
 
                     <td className="px-6 py-3">
 
-{trip.returnTripLogged ? (
+                      {trip.returnTripLogged ? (
 
-    <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">
-        ✅ Complete
-    </span>
+                        <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">
+                          ✅ Complete
+                        </span>
 
-) : (
+                      ) : (
 
-    <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-semibold">
-        🔴 Return Trip Pending
-    </span>
+                        <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-semibold">
+                          🔴 Return Trip Pending
+                        </span>
 
-)}
+                      )}
 
-</td>
+                    </td>
 
                     <td className="px-6 py-3 text-center">
 
                       <div className="flex justify-center gap-4">
 
-  <button
-    onClick={() => editMileage(trip)}
-    className="text-blue-600 hover:text-blue-800 font-semibold"
-    title="Edit Mileage"
-  >
-    ✏️
-  </button>
+                        <button
+                          onClick={() =>
+                            editMileage(trip)
+                          }
+                          className="text-blue-600 hover:text-blue-800 font-semibold"
+                          title="Edit Mileage"
+                        >
+                          ✏️
+                        </button>
 
-  <button
-    onClick={() => deleteTrip(trip.id)}
-    className="text-red-500 hover:text-red-700"
-    title="Delete Trip"
-  >
-    <TrashIcon className="h-5 w-5" />
-  </button>
+                        <button
+                          onClick={() =>
+                            deleteTrip(trip.id)
+                          }
+                          className="text-red-500 hover:text-red-700"
+                          title="Delete Trip"
+                        >
+                          <TrashIcon className="h-5 w-5" />
+                        </button>
 
-</div>
+                      </div>
 
                     </td>
 
