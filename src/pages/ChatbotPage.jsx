@@ -28,14 +28,13 @@ export default function ChatbotPage() {
   // 🔊 REMOVE EMOJIS + MARKDOWN BEFORE SPEECH
   // =========================================================
 
-  const cleanForSpeech = (text) => {
-    return text
-      .replace(/[**\u**{1F300}-**\u**{1FAFF}]/gu, "")
-      .replace(/\*\*/g, "")
-      .replace(/`/g, "")
-      .replace(/•/g, "")
-      .replace(/\n/g, ". ");
-  };
+  const cleanForSpeech = (text) =>
+  text
+    .replace(/[\u{1F300}-\u{1FAFF}]/gu, "")
+    .replace(/\*\*/g, "")
+    .replace(/`/g, "")
+    .replace(/•/g, "")
+    .replace(/\n/g, ". ");
 
   // =========================================================
   // 📍 GET CURRENT GPS LOCATION
