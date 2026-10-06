@@ -1,4 +1,8 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, {
+  useState,
+  useRef,
+  useEffect,
+} from "react";
 
 import axios from "axios";
 
@@ -25,16 +29,24 @@ export default function ChatbotPage() {
   const sendMessageRef = useRef(null);
 
   // =========================================================
+  // 🚗 LIVE GPS TRACKING REFS
+  // =========================================================
+
+  const gpsWatchIdRef = useRef(null);
+  const lastGpsUploadRef = useRef(0);
+  const gpsTrackingRef = useRef(false);
+
+  // =========================================================
   // 🔊 REMOVE EMOJIS + MARKDOWN BEFORE SPEECH
   // =========================================================
 
   const cleanForSpeech = (text) =>
-  text
-    .replace(/[\u{1F300}-\u{1FAFF}]/gu, "")
-    .replace(/\*\*/g, "")
-    .replace(/`/g, "")
-    .replace(/•/g, "")
-    .replace(/\n/g, ". ");
+    text
+      .replace(/[\u{1F300}-\u{1FAFF}]/gu, "")
+      .replace(/\*\*/g, "")
+      .replace(/`/g, "")
+      .replace(/•/g, "")
+      .replace(/\n/g, ". ");
 
   // =========================================================
   // 📍 GET CURRENT GPS LOCATION
@@ -43,7 +55,10 @@ export default function ChatbotPage() {
   const getCurrentLocation = () => {
     return new Promise((resolve) => {
       if (!navigator.geolocation) {
-        console.error("GPS NOT SUPPORTED BY BROWSER");
+        console.error(
+          "GPS NOT SUPPORTED BY BROWSER"
+        );
+
         resolve(null);
         return;
       }
@@ -51,20 +66,33 @@ export default function ChatbotPage() {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const location = {
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-            accuracy: position.coords.accuracy,
+            latitude:
+              position.coords.latitude,
+
+            longitude:
+              position.coords.longitude,
+
+            accuracy:
+              position.coords.accuracy,
           };
 
-          console.log("GPS LOCATION RECEIVED:", location);
+          console.log(
+            "GPS LOCATION RECEIVED:",
+            location
+          );
 
           resolve(location);
         },
+
         (error) => {
-          console.error("GPS LOCATION ERROR:", error);
+          console.error(
+            "GPS LOCATION ERROR:",
+            error
+          );
 
           resolve(null);
         },
+
         {
           enableHighAccuracy: true,
           timeout: 15000,
@@ -75,11 +103,237 @@ export default function ChatbotPage() {
   };
 
   // =========================================================
+  // 🚗 SEND LIVE GPS POINT TO BACKEND
+  // =========================================================
+
+  const sendGpsPointToBackend = async (
+    position
+  ) => {
+    try {
+      const token =
+        localStorage.getItem(
+          "access_token"
+        );
+
+      if (!token) {
+        console.error(
+          "GPS UPLOAD ERROR: NO ACCESS TOKEN"
+        );
+
+        return;
+      }
+
+      const location = {
+        latitude:
+          position.coords.latitude,
+
+        longitude:
+          position.coords.longitude,
+
+        accuracy:
+          position.coords.accuracy,
+      };
+
+      console.log(
+        "========== GPS POINT RECEIVED =========="
+      );
+
+      console.log(
+        "LATITUDE:",
+        location.latitude
+      );
+
+      console.log(
+        "LONGITUDE:",
+        location.longitude
+      );
+
+      console.log(
+        "ACCURACY:",
+        location.accuracy
+      );
+
+      console.log(
+        "========================================"
+      );
+
+      const response =
+        await axios.post(
+          "https://ai-tax-agent-backend-1.onrender.com/mileage/location",
+
+          {
+            location: location,
+          },
+
+          {
+            headers: {
+              Authorization:
+                `Bearer ${token}`,
+
+              "Content-Type":
+                "application/json",
+            },
+          }
+        );
+
+      console.log(
+        "GPS BACKEND STATUS:",
+        response.status
+      );
+
+      console.log(
+        "GPS BACKEND RESPONSE:",
+        response.data
+      );
+
+      if (response.data) {
+        console.log(
+          "GPS TOTAL MILES:",
+          response.data.total_miles
+        );
+
+        console.log(
+          "GPS ADDED MILES:",
+          response.data.added_miles
+        );
+      }
+    } catch (error) {
+      console.error(
+        "GPS UPLOAD ERROR:",
+        error.response?.data ||
+          error.message
+      );
+    }
+  };
+
+  // =========================================================
+  // 🚗 START CONTINUOUS GPS TRACKING
+  // =========================================================
+
+  const startLiveGpsTracking = () => {
+    if (!navigator.geolocation) {
+      console.error(
+        "LIVE GPS NOT SUPPORTED BY BROWSER"
+      );
+
+      return;
+    }
+
+    if (
+      gpsWatchIdRef.current !== null
+    ) {
+      console.log(
+        "LIVE GPS TRACKING ALREADY RUNNING"
+      );
+
+      return;
+    }
+
+    console.log(
+      "========== STARTING LIVE GPS =========="
+    );
+
+    gpsTrackingRef.current = true;
+
+    lastGpsUploadRef.current = 0;
+
+    const watchId =
+      navigator.geolocation.watchPosition(
+        async (position) => {
+          if (
+            !gpsTrackingRef.current
+          ) {
+            return;
+          }
+
+          const now = Date.now();
+
+          // -------------------------------------------------
+          // Upload at most once every 5 seconds
+          // -------------------------------------------------
+
+          if (
+            lastGpsUploadRef.current !==
+              0 &&
+            now -
+                lastGpsUploadRef.current <
+              5000
+          ) {
+            console.log(
+              "GPS POINT SKIPPED: Upload throttle"
+            );
+
+            return;
+          }
+
+          lastGpsUploadRef.current =
+            now;
+
+          await sendGpsPointToBackend(
+            position
+          );
+        },
+
+        (error) => {
+          console.error(
+            "LIVE GPS ERROR:",
+            error
+          );
+        },
+
+        {
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 0,
+        }
+      );
+
+    gpsWatchIdRef.current =
+      watchId;
+
+    console.log(
+      "LIVE GPS WATCH ID:",
+      watchId
+    );
+  };
+
+  // =========================================================
+  // 🛑 STOP CONTINUOUS GPS TRACKING
+  // =========================================================
+
+  const stopLiveGpsTracking = () => {
+    console.log(
+      "========== STOPPING LIVE GPS =========="
+    );
+
+    gpsTrackingRef.current = false;
+
+    if (
+      gpsWatchIdRef.current !== null
+    ) {
+      navigator.geolocation.clearWatch(
+        gpsWatchIdRef.current
+      );
+
+      gpsWatchIdRef.current = null;
+    }
+
+    lastGpsUploadRef.current = 0;
+
+    console.log(
+      "========== LIVE GPS STOPPED =========="
+    );
+  };
+
+  // =========================================================
   // 🚗 DETECT MILEAGE COMMAND
   // =========================================================
 
-  const isStartMileageCommand = (message) => {
-    const lowerMessage = message.toLowerCase();
+  const isStartMileageCommand = (
+    message
+  ) => {
+    const lowerMessage =
+      message.toLowerCase();
 
     const startPatterns = [
       "start mileage",
@@ -111,13 +365,19 @@ export default function ChatbotPage() {
       "leave for",
     ];
 
-    return startPatterns.some((pattern) =>
-      lowerMessage.includes(pattern)
+    return startPatterns.some(
+      (pattern) =>
+        lowerMessage.includes(
+          pattern
+        )
     );
   };
 
-  const isStopMileageCommand = (message) => {
-    const lowerMessage = message.toLowerCase();
+  const isStopMileageCommand = (
+    message
+  ) => {
+    const lowerMessage =
+      message.toLowerCase();
 
     const stopPatterns = [
       "stop trip",
@@ -132,8 +392,11 @@ export default function ChatbotPage() {
       "done driving",
     ];
 
-    return stopPatterns.some((pattern) =>
-      lowerMessage.includes(pattern)
+    return stopPatterns.some(
+      (pattern) =>
+        lowerMessage.includes(
+          pattern
+        )
     );
   };
 
@@ -141,15 +404,22 @@ export default function ChatbotPage() {
   // 🚀 SEND MESSAGE
   // =========================================================
 
-  const sendMessage = async (customMessage = null) => {
-    const messageToSend = customMessage || input;
+  const sendMessage = async (
+    customMessage = null
+  ) => {
+    const messageToSend =
+      customMessage || input;
 
-    if (!messageToSend.trim()) return;
+    if (!messageToSend.trim()) {
+      return;
+    }
 
-    const timestamp = new Date().toLocaleTimeString();
+    const timestamp =
+      new Date().toLocaleTimeString();
 
     setHistory((prev) => [
       ...prev,
+
       {
         user: messageToSend,
         bot: "typing...",
@@ -158,30 +428,62 @@ export default function ChatbotPage() {
     ]);
 
     setInput("");
+
     setLoading(true);
 
     try {
-      const token = localStorage.getItem("access_token");
+      const token =
+        localStorage.getItem(
+          "access_token"
+        );
 
       // =====================================================
-      // 📍 GET GPS ONLY FOR MILEAGE COMMANDS
+      // 📍 DETECT MILEAGE COMMAND
       // =====================================================
 
       let startLocation = null;
       let endLocation = null;
 
-      const startMileage = isStartMileageCommand(messageToSend);
-      const stopMileage = isStopMileageCommand(messageToSend);
+      const startMileage =
+        isStartMileageCommand(
+          messageToSend
+        );
 
-      if (startMileage || stopMileage) {
+      const stopMileage =
+        isStopMileageCommand(
+          messageToSend
+        );
+
+      // =====================================================
+      // 🛑 STOP LIVE GPS BEFORE FINAL GPS
+      // =====================================================
+
+      if (stopMileage) {
+        console.log(
+          "STOP MILEAGE COMMAND DETECTED"
+        );
+
+        stopLiveGpsTracking();
+      }
+
+      // =====================================================
+      // 📍 GET GPS FOR START / STOP
+      // =====================================================
+
+      if (
+        startMileage ||
+        stopMileage
+      ) {
         console.log(
           "MILEAGE COMMAND DETECTED - REQUESTING GPS..."
         );
 
-        const currentLocation = await getCurrentLocation();
+        const currentLocation =
+          await getCurrentLocation();
 
         if (startMileage) {
-          startLocation = currentLocation;
+          startLocation =
+            currentLocation;
 
           console.log(
             "START LOCATION:",
@@ -190,7 +492,8 @@ export default function ChatbotPage() {
         }
 
         if (stopMileage) {
-          endLocation = currentLocation;
+          endLocation =
+            currentLocation;
 
           console.log(
             "END LOCATION:",
@@ -205,39 +508,81 @@ export default function ChatbotPage() {
 
       const res = await axios.post(
         "https://ai-tax-agent-backend-1.onrender.com/chat",
+
         {
           message: messageToSend,
+
           mode: mode,
-          session_id: "user-session-1",
+
+          session_id:
+            "user-session-1",
 
           // GPS for mileage start
-          start_location: startLocation,
+          start_location:
+            startLocation,
 
           // GPS for mileage stop
-          end_location: endLocation,
+          end_location:
+            endLocation,
         },
+
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization:
+              `Bearer ${token}`,
           },
         }
       );
 
       const reply =
-        res.data.reply || "No reply received.";
+        res.data.reply ||
+        "No reply received.";
+
+      // =====================================================
+      // 🚗 START CONTINUOUS GPS AFTER SUCCESSFUL START
+      // =====================================================
+
+      if (
+        startMileage &&
+        startLocation
+      ) {
+        console.log(
+          "========== MILEAGE START SUCCESS =========="
+        );
+
+        console.log(
+          "Starting continuous GPS tracking..."
+        );
+
+        startLiveGpsTracking();
+      }
+
+      // =====================================================
+      // 📋 PENDING CONFIRMATION
+      // =====================================================
 
       const pending =
         mode === "tax"
-          ? res.data.context?.pending_trip_confirmation
+          ? res.data.context
+              ?.pending_trip_confirmation
           : null;
 
       setHistory((prev) => {
-        const newHistory = [...prev];
+        const newHistory = [
+          ...prev,
+        ];
 
-        newHistory[newHistory.length - 1] = {
-          ...newHistory[newHistory.length - 1],
+        newHistory[
+          newHistory.length - 1
+        ] = {
+          ...newHistory[
+            newHistory.length - 1
+          ],
+
           bot: reply,
-          pendingConfirmation: pending || null,
+
+          pendingConfirmation:
+            pending || null,
         };
 
         return newHistory;
@@ -257,7 +602,8 @@ export default function ChatbotPage() {
             cleanForSpeech(reply)
           );
 
-        utterance.lang = "en-US";
+        utterance.lang =
+          "en-US";
 
         window.speechSynthesis.cancel();
 
@@ -271,11 +617,25 @@ export default function ChatbotPage() {
         error
       );
 
-      setHistory((prev) => {
-        const newHistory = [...prev];
+      // If a start request failed,
+      // make sure GPS watcher does not remain active.
+      if (startMileage) {
+        stopLiveGpsTracking();
+      }
 
-        newHistory[newHistory.length - 1].bot =
-          "Error connecting to server.";
+      setHistory((prev) => {
+        const newHistory = [
+          ...prev,
+        ];
+
+        if (
+          newHistory.length > 0
+        ) {
+          newHistory[
+            newHistory.length - 1
+          ].bot =
+            "Error connecting to server.";
+        }
 
         return newHistory;
       });
@@ -284,7 +644,8 @@ export default function ChatbotPage() {
     }
   };
 
-  sendMessageRef.current = sendMessage;
+  sendMessageRef.current =
+    sendMessage;
 
   // =========================================================
   // 🎤 MICROPHONE
@@ -294,22 +655,29 @@ export default function ChatbotPage() {
     if (!listening) {
       try {
         const stream =
-          await navigator.mediaDevices.getUserMedia({
-            audio: true,
-          });
+          await navigator.mediaDevices.getUserMedia(
+            {
+              audio: true,
+            }
+          );
 
         const recorder =
-          new MediaRecorder(stream);
+          new MediaRecorder(
+            stream
+          );
 
         mediaRecorderRef.current =
           recorder;
 
-        audioChunksRef.current = [];
+        audioChunksRef.current =
+          [];
 
         recorder.ondataavailable = (
           event
         ) => {
-          if (event.data.size > 0) {
+          if (
+            event.data.size > 0
+          ) {
             audioChunksRef.current.push(
               event.data
             );
@@ -320,84 +688,104 @@ export default function ChatbotPage() {
           setListening(true);
         };
 
-        recorder.onstop = async () => {
-          setListening(false);
+        recorder.onstop =
+          async () => {
+            setListening(false);
 
-          const mimeType =
-            mediaRecorderRef.current
-              ?.mimeType ||
-            audioChunksRef.current[0]
-              ?.type ||
-            "audio/webm";
+            const mimeType =
+              mediaRecorderRef
+                .current?.mimeType ||
+              audioChunksRef
+                .current[0]?.type ||
+              "audio/webm";
 
-          const extension =
-            mimeType.includes("mp4")
-              ? "mp4"
-              : mimeType.includes("mpeg")
-              ? "mp3"
-              : mimeType.includes("ogg")
-              ? "ogg"
-              : mimeType.includes("wav")
-              ? "wav"
-              : "webm";
+            const extension =
+              mimeType.includes(
+                "mp4"
+              )
+                ? "mp4"
+                : mimeType.includes(
+                    "mpeg"
+                  )
+                ? "mp3"
+                : mimeType.includes(
+                    "ogg"
+                  )
+                ? "ogg"
+                : mimeType.includes(
+                    "wav"
+                  )
+                ? "wav"
+                : "webm";
 
-          const audioBlob =
-            new Blob(
-              audioChunksRef.current,
-              {
-                type: mimeType,
-              }
-            );
-
-          const formData =
-            new FormData();
-
-          formData.append(
-            "audio",
-            audioBlob,
-            `voice.${extension}`
-          );
-
-          try {
-            const token =
-              localStorage.getItem(
-                "access_token"
-              );
-
-            const res =
-              await axios.post(
-                "https://ai-tax-agent-backend-1.onrender.com/transcribe",
-                formData,
+            const audioBlob =
+              new Blob(
+                audioChunksRef.current,
                 {
-                  headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type":
-                      "multipart/form-data",
-                  },
+                  type: mimeType,
                 }
               );
 
-            setInput(
-              res.data.text || ""
-            );
-          } catch (err) {
-            console.error(err);
+            const formData =
+              new FormData();
 
-            alert(
-              "Speech transcription failed."
+            formData.append(
+              "audio",
+              audioBlob,
+              `voice.${extension}`
             );
-          }
 
-          stream
-            .getTracks()
-            .forEach((track) =>
-              track.stop()
-            );
-        };
+            try {
+              const token =
+                localStorage.getItem(
+                  "access_token"
+                );
+
+              const res =
+                await axios.post(
+                  "https://ai-tax-agent-backend-1.onrender.com/transcribe",
+
+                  formData,
+
+                  {
+                    headers: {
+                      Authorization:
+                        `Bearer ${token}`,
+
+                      "Content-Type":
+                        "multipart/form-data",
+                    },
+                  }
+                );
+
+              setInput(
+                res.data.text || ""
+              );
+            } catch (err) {
+              console.error(
+                "SPEECH TRANSCRIPTION ERROR:",
+                err
+              );
+
+              alert(
+                "Speech transcription failed."
+              );
+            }
+
+            stream
+              .getTracks()
+              .forEach(
+                (track) =>
+                  track.stop()
+              );
+          };
 
         recorder.start();
       } catch (err) {
-        console.error(err);
+        console.error(
+          "MICROPHONE ERROR:",
+          err
+        );
 
         alert(
           "Unable to access microphone."
@@ -434,10 +822,22 @@ export default function ChatbotPage() {
   // =========================================================
 
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({
-      behavior: "smooth",
-    });
+    chatEndRef.current?.scrollIntoView(
+      {
+        behavior: "smooth",
+      }
+    );
   }, [history]);
+
+  // =========================================================
+  // 🧹 CLEANUP GPS WATCHER
+  // =========================================================
+
+  useEffect(() => {
+    return () => {
+      stopLiveGpsTracking();
+    };
+  }, []);
 
   // =========================================================
   // 🎨 UI
@@ -461,6 +861,7 @@ export default function ChatbotPage() {
             />
 
             <div>
+
               <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 Max
               </h1>
@@ -468,6 +869,7 @@ export default function ChatbotPage() {
               <p className="text-gray-500 text-sm">
                 Your RefundPilot AI Assistant
               </p>
+
             </div>
 
           </h2>
@@ -486,6 +888,7 @@ export default function ChatbotPage() {
                   : "bg-gray-300 text-gray-800"
               }`}
             >
+
               {micEnabled ? (
                 <>
                   <MicrophoneIcon className="h-5 w-5" />
@@ -497,6 +900,7 @@ export default function ChatbotPage() {
                   Mic Off
                 </>
               )}
+
             </button>
 
             <button
@@ -547,86 +951,82 @@ export default function ChatbotPage() {
 
         <div className="flex-1 overflow-y-auto rounded-2xl p-6 bg-gradient-to-br from-gray-50 to-gray-100 shadow-inner space-y-6">
 
-          {history.map((h, idx) => (
+          {history.map(
+            (h, idx) => (
 
-            <div
-              key={idx}
-              className="space-y-3"
-            >
+              <div
+                key={idx}
+                className="space-y-3"
+              >
 
-              <div className="flex justify-end">
+                <div className="flex justify-end">
 
-                <div className="px-5 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-3xl shadow-lg max-w-[80%] text-sm">
-                  {h.user}
+                  <div className="px-5 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-3xl shadow-lg max-w-[80%] text-sm">
+                    {h.user}
+                  </div>
+
                 </div>
 
-              </div>
+                <div className="flex justify-start">
 
-              <div className="flex justify-start">
+                  <div className="px-5 py-3 bg-white/90 border border-gray-200 text-gray-800 rounded-3xl shadow-md max-w-lg text-sm">
 
-                <div className="px-5 py-3 bg-white/90 border border-gray-200 text-gray-800 rounded-3xl shadow-md max-w-lg text-sm">
+                    {h.bot ===
+                    "typing..." ? (
+                      <div className="flex gap-1">
 
-                  {h.bot ===
-                  "typing..." ? (
+                        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
 
-                    <div className="flex gap-1">
+                        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100"></span>
 
-                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
-
-                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100"></span>
-
-                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200"></span>
-
-                    </div>
-
-                  ) : (
-
-                    <ReactMarkdown>
-                      {h.bot}
-                    </ReactMarkdown>
-
-                  )}
-
-                  {/* Confirmation Buttons */}
-
-                  {mode === "tax" &&
-                    h.pendingConfirmation && (
-
-                      <div className="mt-4 flex gap-3">
-
-                        <button
-                          onClick={() =>
-                            sendMessage(
-                              "CONFIRM"
-                            )
-                          }
-                          className="px-4 py-2 bg-green-600 text-white rounded-full text-xs shadow hover:scale-105 transition"
-                        >
-                          ✓ Confirm Trip
-                        </button>
-
-                        <button
-                          onClick={() =>
-                            sendMessage(
-                              "EDIT"
-                            )
-                          }
-                          className="px-4 py-2 bg-blue-600 text-white rounded-full text-xs shadow hover:scale-105 transition"
-                        >
-                          ✏ Edit Details
-                        </button>
+                        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200"></span>
 
                       </div>
-
+                    ) : (
+                      <ReactMarkdown>
+                        {h.bot}
+                      </ReactMarkdown>
                     )}
+
+                    {/* Confirmation Buttons */}
+
+                    {mode ===
+                      "tax" &&
+                      h.pendingConfirmation && (
+                        <div className="mt-4 flex gap-3">
+
+                          <button
+                            onClick={() =>
+                              sendMessage(
+                                "CONFIRM"
+                              )
+                            }
+                            className="px-4 py-2 bg-green-600 text-white rounded-full text-xs shadow hover:scale-105 transition"
+                          >
+                            ✓ Confirm Trip
+                          </button>
+
+                          <button
+                            onClick={() =>
+                              sendMessage(
+                                "EDIT"
+                              )
+                            }
+                            className="px-4 py-2 bg-blue-600 text-white rounded-full text-xs shadow hover:scale-105 transition"
+                          >
+                            ✏ Edit Details
+                          </button>
+
+                        </div>
+                      )}
+
+                  </div>
 
                 </div>
 
               </div>
-
-            </div>
-
-          ))}
+            )
+          )}
 
           <div ref={chatEndRef}></div>
 
@@ -639,7 +1039,9 @@ export default function ChatbotPage() {
           <input
             value={input}
             onChange={(e) =>
-              setInput(e.target.value)
+              setInput(
+                e.target.value
+              )
             }
             onKeyDown={handleKeyDown}
             className="flex-1 px-4 py-2 bg-transparent outline-none text-gray-700 text-sm"
@@ -670,6 +1072,7 @@ export default function ChatbotPage() {
             disabled={loading}
             className="px-5 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full flex items-center gap-2"
           >
+
             <PaperAirplaneIcon className="h-5 w-5 rotate-90" />
 
             {loading
