@@ -1,11 +1,14 @@
 
 import React, { useEffect, useState } from "react";
+import { useAuth } from "../../context/AuthContext";
 
 const BASE_URL =
-  process.env.REACT_APP_API_BASE_URL ||
+  process.env.REACT_APP_API_BASE_URL?.trim() ||
   "https://ai-tax-agent-backend-1.onrender.com";
 
 export default function AccountantMileage() {
+  const { getAccessToken, refreshAccessToken } = useAuth();
+
   const [mileage, setMileage] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -18,57 +21,45 @@ export default function AccountantMileage() {
         setLoading(true);
         setError("");
 
-        // Find the existing Supabase session token, if stored locally.
-        let accessToken = null;
+        let token = getAccessToken();
 
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-
-          if (!key) continue;
-
-          try {
-            const value = JSON.parse(localStorage.getItem(key));
-
-            if (
-              key.endsWith("-auth-token") &&
-              value?.access_token
-            ) {
-              accessToken = value.access_token;
-              break;
-            }
-
-            if (
-              ["access_token", "accessToken", "token"].includes(key) &&
-              typeof value === "string"
-            ) {
-              accessToken = value;
-              break;
-            }
-          } catch {
-            // Ignore unrelated or non-JSON localStorage entries.
-          }
+        if (!token) {
+          token = await refreshAccessToken();
         }
 
-        const headers = {
-          Accept: "application/json",
-        };
-
-        if (accessToken) {
-          headers.Authorization = `Bearer ${accessToken}`;
+        if (!token) {
+          throw new Error(
+            "Your session has expired. Please sign in again."
+          );
         }
 
-        const response = await fetch(
-          `${BASE_URL}/mileage/history`,
-          {
+        const requestMileage = (accessToken) =>
+          fetch(`${BASE_URL}/mileage/history`, {
             method: "GET",
-            headers,
+            headers: {
+              Accept: "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
             signal: controller.signal,
+          });
+
+        let response = await requestMileage(token);
+
+        if (response.status === 401) {
+          token = await refreshAccessToken();
+
+          if (!token) {
+            throw new Error(
+              "Your session has expired. Please sign in again."
+            );
           }
-        );
+
+          response = await requestMileage(token);
+        }
 
         if (response.status === 401) {
           throw new Error(
-            "Authentication failed. Please sign in again and verify your session."
+            "Authentication failed. Please sign in again."
           );
         }
 
@@ -80,7 +71,6 @@ export default function AccountantMileage() {
 
         const data = await response.json();
 
-        // Support an array or common object-based API response formats.
         const records = Array.isArray(data)
           ? data
           : Array.isArray(data?.history)
@@ -114,7 +104,7 @@ export default function AccountantMileage() {
     loadMileage();
 
     return () => controller.abort();
-  }, []);
+  }, [getAccessToken, refreshAccessToken]);
 
   return (
     <div className="p-8">
@@ -123,7 +113,9 @@ export default function AccountantMileage() {
       </h1>
 
       {loading && (
-        <p className="text-gray-600">Loading mileage records...</p>
+        <p className="text-gray-600">
+          Loading mileage records...
+        </p>
       )}
 
       {!loading && error && (
@@ -171,11 +163,15 @@ export default function AccountantMileage() {
                     </td>
 
                     <td className="p-3">
-                      {m.total_miles ?? m.distance_miles ?? "—"}
+                      {m.total_miles ??
+                        m.distance_miles ??
+                        "—"}
                     </td>
 
                     <td className="p-3">
-                      {m.business_purpose ?? m.purpose ?? "—"}
+                      {m.business_purpose ??
+                        m.purpose ??
+                        "—"}
                     </td>
 
                     <td className="p-3">
