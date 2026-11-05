@@ -1,6 +1,7 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
+import { Analytics } from "@vercel/analytics/react";
 
 import OnboardingPage from "./pages/OnboardingPage";
 import Layout from "./components/Layout";
@@ -47,10 +48,11 @@ function ProtectedRoute({ children }) {
 
 function App() {
   return (
-    <Routes>
-      {/* Public */}
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
+    <>
+      <Routes>
+        {/* Public */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
 
       {/* Standalone Onboarding */}
       <Route
@@ -117,7 +119,9 @@ function App() {
       <Route path="/subscription-cancel" element={<SubscriptionCancel />} />
 
       <Route path="*" element={<Navigate to="/login" replace />} />
-    </Routes>
+      </Routes>
+      <Analytics />
+    </>
   );
 }
 
